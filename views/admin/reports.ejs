@@ -1,0 +1,33 @@
+<%
+const tot = R.revenue.reduce((acc, x) => acc + Number(x.total), 0);
+const cnt = R.revenue.reduce((acc, x) => acc + Number(x.count), 0);
+const joins = R.growth.reduce((acc, x) => acc + Number(x.count), 0);
+const expTotal = Math.max(1, R.expiry.reduce((acc, x) => acc + Number(x.count), 0));
+const chartJson = (type, labels, data) => JSON.stringify({ type, labels, data });
+%>
+<div class="page-head"><div><h1>Reports</h1><p class="muted">Revenue, payments, membership trends, renewals and trainer utilization — last 6 months.</p></div>
+  <div class="actions"><a class="btn primary" href="/admin/export?type=report"><%- icon('download') %>Export full report</a></div></div>
+
+<div class="kpis">
+  <div class="kpi sky"><small>6-month revenue</small><strong><%= inr(tot) %></strong></div>
+  <div class="kpi green"><small>Payments received</small><strong><%= cnt %></strong></div>
+  <div class="kpi cyan"><small>New members</small><strong><%= joins %></strong></div>
+  <div class="kpi amber"><small>Avg. payment</small><strong><%= inr(cnt ? tot / cnt : 0) %></strong></div>
+</div>
+
+<div class="layout-12">
+  <section class="card col-8"><div class="card-head"><h2>Revenue by month</h2></div><div class="chart-box"><canvas data-chart='<%- chartJson("bar", R.revenue.map(x => x.label), R.revenue.map(x => x.total)) %>'></canvas></div></section>
+  <section class="card col-4"><div class="card-head"><h2>Plan distribution</h2></div><div class="chart-box sm"><canvas data-chart='<%- chartJson("doughnut", R.plans.map(x => x.name), R.plans.map(x => Number(x.members))) %>'></canvas></div></section>
+  <section class="card col-6"><div class="card-head"><h2>Membership growth (new joins)</h2></div><div class="chart-box"><canvas data-chart='<%- chartJson("bar2", R.growth.map(x => x.label), R.growth.map(x => x.count)) %>'></canvas></div></section>
+  <section class="card col-6"><div class="card-head"><h2>Trainer utilization (slots)</h2></div><div class="chart-box"><canvas data-chart='<%- chartJson("hbar", R.trainers.map(x => x.name), R.trainers.map(x => Number(x.slots))) %>'></canvas></div></section>
+  <section class="card col-5"><div class="card-head"><h2>Expiry & renewal activity</h2></div>
+    <% R.expiry.forEach(b => { %>
+      <div class="meter"><div><small><%= b.label %></small><small class="mono"><%= b.count %></small></div><span><i class="<%= b.kind %>" style="width:<%= Math.round(b.count / expTotal * 100) %>%"></i></span></div>
+    <% }) %>
+  </section>
+  <section class="card col-7 flush"><div class="card-head pad"><h2>Payment methods</h2></div>
+    <% if (!R.methods || R.methods.length === 0) { %><p class="empty">No payments yet.</p><% } else { %>
+    <div class="table-wrap"><table><thead><tr><th>Method</th><th>Payments</th><th class="right">Total</th></tr></thead><tbody>
+    <% R.methods.forEach(x => { %><tr><td><b><%= x.method %></b></td><td><%= x.cnt %></td><td class="right money"><%= inr(x.total) %></td></tr><% }) %>
+    </tbody></table></div><% } %></section>
+</div>

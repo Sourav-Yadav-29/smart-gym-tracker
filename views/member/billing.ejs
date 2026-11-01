@@ -1,0 +1,57 @@
+<div class="page-head">
+  <div><p class="eyebrow">Billing & receipts</p><h1>Upcoming Dues & Pay</h1></div>
+  <span class="badge <%= days_remaining < 0 ? 'red' : 'green' %>">Valid until <%= fdate(profile.plan_end_date) %></span>
+</div>
+
+<div class="layout-12">
+  <section class="card col-5">
+    <div class="card-head"><h2>Pay upcoming dues / renew plan</h2></div>
+    <form class="form" method="post" action="/member/actions">
+      <input type="hidden" name="action" value="pay_member_dues">
+      <input type="hidden" name="cycle_months" id="selectedCycleMonths" value="3">
+      <input type="hidden" name="back" value="/member?page=billing">
+
+      <label>1. Choose membership tier
+        <select name="plan_id" id="duesPlanSelect" onchange="recalcDuesPreview()">
+          <% (plans || []).forEach(pl => { 
+               const rate = Math.round((Number(pl.price) / Math.max(1, Number(pl.duration_months))) * 100) / 100;
+          %>
+            <option value="<%= pl.plan_id %>" data-monthly="<%= rate %>" <%= Number(profile.membership_plan_id || 1) === Number(pl.plan_id) ? 'selected' : '' %>><%= pl.plan_name %> (Base: <%= inr(rate) %>/mo)</option>
+          <% }) %>
+        </select></label>
+
+      <div><p class="eyebrow" style="margin-bottom:8px">2. Select billing frequency</p>
+        <div class="cycles">
+          <% cycles.forEach(c => { %>
+            <button type="button" class="cycle <%= c.months === 3 ? 'selected' : '' %>" onclick="selectBillingCycle(<%= c.months %>, this)"><b><%= c.name %></b><span><%= c.sub %></span></button>
+          <% }) %>
+        </div></div>
+
+      <label>3. Payment mode
+        <select name="method">
+          <% pay_methods.forEach(pm => { %><option value="<%= pm.value %>"><%= pm.label %></option><% }) %>
+        </select></label>
+
+      <div class="pay-total">
+        <div><small class="muted">Total payable now</small><br><small id="cycleSubtext" class="money">Extends membership by +3 Months</small></div>
+        <strong id="payablePreview" class="mono">₹3,563</strong>
+      </div>
+      <button class="btn primary block" type="submit" data-testid="pay-dues-button">⚡ Pay dues & extend membership</button>
+    </form>
+  </section>
+
+  <section class="card flush col-7">
+    <div class="card-head pad"><h2>My membership payment receipts</h2><span class="muted"><%= payments ? payments.length : 0 %> receipts</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Receipt #</th><th>Amount paid</th><th>Payment date</th><th>Mode</th><th>Status</th></tr></thead>
+      <tbody>
+        <% if (!payments || payments.length === 0) { %><tr><td colspan="5" class="empty">No payments recorded yet.</td></tr><% } %>
+        <% (payments || []).forEach(p => { %>
+          <tr><td class="mono">#INV-<%= p.payment_id %></td><td class="money"><%= inr(p.amount, 2) %></td>
+            <td class="mono nowrap"><%= fdate(p.payment_date) %></td><td><span class="badge cyan"><%= p.method %></span></td>
+            <td><span class="badge green"><i class="dot"></i>Paid</span></td></tr>
+        <% }) %>
+      </tbody>
+    </table></div>
+  </section>
+</div>

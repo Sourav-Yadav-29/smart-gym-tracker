@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronPulse — Smart Gym & Fitness Membership Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090C10;
+            --surface: #11161F;
+            --elevated: #171E2B;
+            --lime: #CCFF00;
+            --cyan: #00F0FF;
+            --text: #F3F6FA;
+            --muted: #94A3B8;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 6%;
+            border-bottom: 1px solid var(--border);
+            background: rgba(9, 12, 16, 0.88);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-badge {
+            background: var(--lime);
+            color: #090C10;
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.15s;
+        }
+
+        .nav-links a:hover { color: var(--lime); }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: 0.18s ease;
+            display: inline-block;
+        }
+
+        .btn-outline {
+            border: 1px solid rgba(255,255,255,0.16);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--lime);
+            color: var(--lime);
+        }
+
+        .btn-lime {
+            background: var(--lime);
+            color: #090C10;
+            font-weight: 700;
+        }
+
+        .btn-lime:hover {
+            box-shadow: 0 0 24px rgba(204, 255, 0, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .hero {
+            padding: 110px 6%;
+            background:
+                linear-gradient(90deg, rgba(9,12,16,0.96) 38%, rgba(9,12,16,0.68) 100%),
+                url('1.jpg') center/cover no-repeat;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-inner { max-width: 680px; }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(204, 255, 0, 0.12);
+            border: 1px solid rgba(204, 255, 0, 0.3);
+            color: var(--lime);
+            font-size: 0.76rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.4rem, 4.5vw, 3.7rem);
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            margin-bottom: 18px;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            padding: 72px 6%;
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+
+        .section-head {
+            margin-bottom: 36px;
+        }
+
+        .section-head h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .section-head p { color: var(--muted); }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .plan-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(204, 255, 0, 0.4);
+        }
+
+        .plan-card.featured {
+            border-color: var(--lime);
+            background: linear-gradient(180deg, rgba(204,255,0,0.06), var(--surface));
+        }
+
+        .plan-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .plan-price {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--lime);
+            margin: 14px 0 4px;
+        }
+
+        .plan-duration {
+            font-size: 0.84rem;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .coaches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .coach-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .coach-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+        }
+
+        .coach-spec {
+            color: var(--cyan);
+            font-size: 0.84rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <span class="logo-badge">IP</span>
+            IRONPULSE GYM
+        </a>
+        <div class="nav-links">
+            <a href="#plans">Membership Plans</a>
+            <a href="#coaches">Certified Trainers</a>
+            <a href="/login" class="btn btn-outline">Member / Staff Login</a>
+            <a href="/dashboard" class="btn btn-lime">Open Command Center →</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-inner">
+            <span class="pill">IronPulse Smart Gym & DBMS</span>
+            <h1>Train Smarter. Track Every Slot, Locker & Membership.</h1>
+            <p>Powered by automated MySQL triggers, role-restricted trainer views, and real-time slot booking telemetry.</p>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                <a href="/login" class="btn btn-lime">Sign In to Portal</a>
+                <a href="#plans" class="btn btn-outline">View Membership Tiers</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="plans" class="section">
+        <div class="section-head">
+            <h2>Membership Plans</h2>
+            <p>Transparent pricing tiers synced directly with <code>Membership_Plans</code> in MySQL.</p>
+        </div>
+        <div class="plans-grid">
+            <div class="plan-card">
+                <div>
+                    <div class="plan-name">Basic Access</div>
+                    <div class="plan-price">₹4,500</div>
+                    <div class="plan-duration">3 Months Duration</div>
+                    <p style="font-size:0.86rem;color:var(--muted);">Full gym floor access, dedicated locker assignment, and standard slot booking.</p>
+                </div>
+                <a href="/login" class="btn btn-outline" style="margin-top:22px;text-align:center;">Select Basic</a>
+            </div>
+
+            <div class="plan-card">
+                <div>
+                    <div class="plan-name">Silver Fit</div>
+                    <div class="plan-price">₹8,500</div>
+                    <div class="plan-duration">6 Months Duration</div>
+                    <p style="font-size:0.86rem;color:var(--muted);">Includes trainer-guided slot reservations, locker access, and body composition tracking.</p>
+                </div>
+                <a href="/login" class="btn btn-outline" style="margin-top:22px;text-align:center;">Select Silver Fit</a>
+            </div>
+
+            <div class="plan-card featured">
+                <div>
+                    <div class="plan-name">Gold VIP</div>
+                    <div class="plan-price">₹15,000</div>
+                    <div class="plan-duration">12 Months Duration</div>
+                    <p style="font-size:0.86rem;color:var(--muted);">Priority 1-on-1 coaching slots with Coach Marcus or Coach Elena + permanent VIP locker.</p>
+                </div>
+                <a href="/login" class="btn btn-lime" style="margin-top:22px;text-align:center;">Select Gold VIP</a>
+            </div>
+
+            <div class="plan-card">
+                <div>
+                    <div class="plan-name">Platinum Pro</div>
+                    <div class="plan-price">₹22,000</div>
+                    <div class="plan-duration">12 Months Duration</div>
+                    <p style="font-size:0.86rem;color:var(--muted);">All-access strength, hypertrophy & HIIT programming with unlimited slot bookings.</p>
+                </div>
+                <a href="/login" class="btn btn-outline" style="margin-top:22px;text-align:center;">Select Platinum Pro</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="coaches" class="section" style="padding-top:10px;">
+        <div class="section-head">
+            <h2>Certified Coaching Roster</h2>
+            <p>Protected by <code>Trainer_Assigned_View</code> role-based SQL access control.</p>
+        </div>
+        <div class="coaches-grid">
+            <div class="coach-card">
+                <h3>Coach Marcus</h3>
+                <div class="coach-spec">Strength & Hypertrophy Specialist</div>
+                <p style="font-size:0.88rem;color:var(--muted);">Leads morning and evening compound strength blocks (`07:00 AM - 08:00 AM` & `05:00 PM - 06:00 PM`). Contact: <code>trainer1@ironpulse.com</code></p>
+            </div>
+            <div class="coach-card">
+                <h3>Coach Elena</h3>
+                <div class="coach-spec">Functional & HIIT Conditioning</div>
+                <p style="font-size:0.88rem;color:var(--muted);">Specializes in metabolic conditioning, mobility, and athletic endurance (`09:30 AM - 10:30 AM`). Contact: <code>trainer2@ironpulse.com</code></p>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

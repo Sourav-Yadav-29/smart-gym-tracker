@@ -1,0 +1,37 @@
+<div class="page-head">
+  <div><p class="eyebrow">Training sessions</p><h1>My Slot & Locker</h1></div>
+</div>
+
+<div class="layout-12">
+  <section class="card col-5">
+    <div class="card-head"><h2>Book additional training slot</h2></div>
+    <form class="form" method="post" action="/member/actions">
+      <input type="hidden" name="action" value="member_book_slot">
+      <input type="hidden" name="back" value="/member?page=schedule">
+      <label>Choose coach
+        <select name="trainer_id" required>
+          <% (trainers || []).forEach(t => { %><option value="<%= t.trainer_id %>"><%= t.name %> (<%= t.specialization %>)</option><% }) %>
+        </select></label>
+      <label>Preferred slot
+        <select name="slot_time">
+          <% slot_times.forEach(s => { %><option value="<%= s %>"><%= s %></option><% }) %>
+        </select></label>
+      <button class="btn primary block" type="submit">+ Reserve my slot & locker</button>
+    </form>
+  </section>
+
+  <section class="card flush col-7">
+    <div class="card-head pad"><h2>My assigned slots & lockers</h2><span class="muted"><%= bookings ? bookings.length : 0 %> bookings</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Booking</th><th>Coach</th><th>Specialization</th><th>Slot time</th><th>Locker</th></tr></thead>
+      <tbody>
+        <% if (!bookings || bookings.length === 0) { %><tr><td colspan="5" class="empty">No slots booked yet — reserve your first session.</td></tr><% } %>
+        <% (bookings || []).forEach(b => { %>
+          <tr><td class="mono">#<%= b.booking_id %></td><td><b><%= b.trainer_name %></b></td>
+            <td><span class="badge violet"><%= b.specialization %></span></td>
+            <td><%= b.slot_time %></td><td><span class="badge cyan"><%= b.locker_number %></span></td></tr>
+        <% }) %>
+      </tbody>
+    </table></div>
+  </section>
+</div>

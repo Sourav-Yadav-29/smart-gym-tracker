@@ -1,0 +1,15 @@
+<div class="page-head"><div><h1>Access Logs</h1><p class="muted">Member login / logout sessions · <%= online %> in the gym right now.</p></div>
+  <div class="actions"><a class="btn" href="/admin/export?type=logs"><%- icon('download') %>Export CSV</a><button class="btn primary" onclick="openModal('m-checkin')">Record check-in</button></div></div>
+
+<form class="filters card" method="get" action="/admin"><input type="hidden" name="page" value="logs">
+  <input name="q" value="<%= query.q || '' %>" placeholder="Filter by member name">
+  <select name="status" onchange="this.form.submit()"><option value="">All sessions</option><option value="Online" <%= query.status === 'Online' ? 'selected' : '' %>>Online</option><option value="Logged Out" <%= query.status === 'Logged Out' ? 'selected' : '' %>>Logged Out</option></select>
+  <button class="btn">Apply</button><a class="btn ghost" href="/admin?page=logs">Clear</a></form>
+
+<section class="card flush">
+<% if (!logs || logs.length === 0) { %><p class="empty">No sessions match.</p><% } else { %>
+<div class="table-wrap"><table><thead><tr><th>Member</th><th class="hide-md">Trainer(s)</th><th>Login</th><th>Logout</th><th>Duration</th><th>Status</th><th class="right">Action</th></tr></thead><tbody>
+<% logs.forEach(l => { %><tr><td><b><%= l.name %></b></td><td class="hide-md"><%= l.trainers || 'Unassigned' %></td><td class="mono accent"><%= fdt(l.login_time) %></td><td class="mono"><%= l.logout_time ? fdt(l.logout_time) : 'Currently active' %></td>
+  <td><%= l.duration_minutes !== null ? l.duration_minutes + ' min' : 'In progress' %></td><td><span class="badge <%= l.session_status === 'Online' ? 'green' : 'gray' %>"><%= l.session_status %></span></td>
+  <td class="right"><% if (l.session_status === 'Online') { %><form method="post" action="/admin/actions" class="inline"><input type="hidden" name="action" value="checkout"><input type="hidden" name="log_id" value="<%= l.log_id %>"><input type="hidden" name="back" value="<%= selfUrl %>"><button class="btn xs">Check out</button></form><% } else { %>—<% } %></td></tr><% }) %>
+</tbody></table></div><% } %></section>

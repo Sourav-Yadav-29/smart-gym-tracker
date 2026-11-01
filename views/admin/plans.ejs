@@ -1,0 +1,19 @@
+<div class="page-head"><div><h1>Plans & Revenue</h1><p class="muted">Membership tiers, subscribers and the admin-only payment ledger.</p></div>
+  <div class="actions"><button class="btn" onclick="openModal('m-plan')"><%- icon('plus') %>New plan</button><button class="btn primary" onclick="openModal('m-payment')">Record payment</button></div></div>
+
+<div class="cards4">
+<% R.plans.forEach((p, i) => { %>
+  <div class="card lift <%= i === 0 ? 'featured' : '' %>">
+    <div class="card-head"><h2><%= p.name %></h2><button class="btn xs" onclick='openModal("m-plan", <%= JSON.stringify({ plan_id: p.plan_id, plan_name: p.name, price: Number(p.price), duration_months: p.duration_months }) %>)'>Edit</button></div>
+    <strong class="price"><%= inr(p.price) %></strong>
+    <small class="muted"><%= p.duration_months %> months · <%= inr(Math.round(p.price / Math.max(1, p.duration_months))) %>/mo</small>
+    <div class="plan-foot"><span><b><%= p.members %></b> subscribers</span><span class="money"><%= inr(p.revenue) %></span></div>
+  </div>
+<% }) %>
+</div>
+
+<section class="card flush"><div class="card-head pad"><h2>Financial ledger</h2><span class="actions"><span class="badge green">Total <%= inr(totalRevenue, 2) %></span><a class="btn xs" href="/admin/export?type=payments">CSV</a></span></div>
+<% if (!payments || payments.length === 0) { %><p class="empty">No payments recorded.</p><% } else { %>
+<div class="table-wrap"><table><thead><tr><th>Receipt</th><th>Member</th><th>Amount</th><th>Date</th><th>Method</th></tr></thead><tbody>
+<% payments.forEach(p => { %><tr><td class="mono">#INV-<%= p.payment_id %></td><td><b><%= p.name %></b></td><td class="money"><%= inr(p.amount, 2) %></td><td><%= fdate(p.payment_date) %></td><td><%= p.method %></td></tr><% }) %>
+</tbody></table></div><% } %></section>

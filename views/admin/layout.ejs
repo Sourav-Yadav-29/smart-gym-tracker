@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronPulse — Admin Portal</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('ip-theme') || 'light';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+<div class="backdrop" id="navBackdrop" onclick="toggleNav(false)"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">IP</div><div><b>IRONPULSE</b><small>Admin Portal</small></div></div>
+  <div class="rbac"><b>RBAC Policy: Admin</b><span>Full superuser access — trainers, members, financials & logs</span></div>
+  <nav>
+    <% Object.entries(PAGES).forEach(([key, [label, ic]]) => { 
+        const active = (page === key) || (page === 'member' && key === 'members');
+    %>
+      <a href="/admin?page=<%= key %>" class="<%= active ? 'active' : '' %>" data-testid="nav-<%= key %>-link">
+        <%- icon(ic) %><span><%= label %></span>
+        <% if (counts[key]) { %><em><%= counts[key] %></em><% } %>
+      </a>
+    <% }) %>
+  </nav>
+  <div class="me"><span class="avatar"><%= initials(actor_name) %></span><div><b><%= actor_name %></b><small>● Admin (#<%= actor_id %>)</small></div></div>
+  <a class="signout" href="/logout" data-testid="signout-link">Sign out →</a>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <button class="icon-btn mobile-only" onclick="toggleNav(true)" aria-label="Menu"><%- icon('menu') %></button>
+    <form class="search" method="get" action="/admin">
+      <input type="hidden" name="page" value="members"><%- icon('search') %>
+      <input name="q" placeholder="Search members by name, email, phone…" value="<%= (locals.query && query.q) || '' %>" data-testid="global-search-input">
+    </form>
+    <div class="top-actions">
+      <button class="btn" onclick="openModal('m-admin')" data-testid="topbar-add-admin-button"><%- icon('plus') %><span class="hide-sm">New admin</span></button>
+      <button class="btn primary" onclick="openModal('m-member')" data-testid="topbar-add-member-button"><%- icon('plus') %><span class="hide-sm">New member</span></button>
+      <div class="notif-wrap">
+        <button class="icon-btn" id="bellBtn" onclick="toggleNotif(event)" aria-label="Notifications" data-testid="notifications-button"><%- icon('bell') %>
+          <% if (unread > 0) { %><span class="count" id="notifCount"><%= unread %></span><% } %></button>
+        <div class="notif-panel" id="notifPanel" onclick="event.stopPropagation()">
+          <div class="np-head"><b>Notifications & activity</b><span><button onclick="notifAction('read')">Mark read</button><button onclick="notifAction('clear')">Clear</button></span></div>
+          <div class="np-list" id="notifList">
+            <% if (!notifications || notifications.length === 0) { %><p class="empty">No notifications yet.</p><% } %>
+            <% notifications.forEach(n => { %>
+              <div class="np-item <%= Number(n.is_read) ? '' : 'unread' %>">
+                <div><span class="tag"><%= n.category %></span><time><%= fdt(n.created_at) %></time></div>
+                <p><%= n.message %></p><small>— <%= n.actor_name %></small>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme" data-testid="theme-toggle-button"><span class="t-light"><%- icon('sun') %></span><span class="t-dark"><%- icon('moon') %></span></button>
+    </div>
+  </header>
+
+  <main class="content">
+    <% if (flash) { %><div class="toast <%= flash.type %>" id="toast" data-testid="flash-message"><%= flash.msg %><button onclick="this.parentNode.remove()"><%- icon('x') %></button></div><% } %>
+    <%- body %>
+  </main>
+</div>
+
+<%- include('modals') %>
+<script src="/admin/assets/admin.js"></script>
+</body>
+</html>

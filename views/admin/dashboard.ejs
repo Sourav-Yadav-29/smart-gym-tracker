@@ -1,0 +1,83 @@
+<div class="page-head">
+  <div><p class="eyebrow"><%= fdate(todayDate) %></p><h1 class="hero">Welcome back, <span class="grad"><%= actor_name %></span><span class="dotc">.</span></h1>
+  <p class="muted">Here is what needs your attention at IronPulse today.</p></div>
+  <a class="btn" href="/admin?page=reports">View reports →</a>
+</div>
+
+<div class="kpis">
+  <div class="kpi sky"><small>Total revenue</small><strong data-testid="kpi-revenue-value"><%= inr(revenue) %></strong><span><%= payCount %> verified payments</span></div>
+  <div class="kpi green"><small>Active members</small><strong><%= active.length %> <i>/ <%= members.length %></i></strong><span><%= members.length - active.length %> inactive accounts</span></div>
+  <div class="kpi amber"><small>Outstanding dues</small><strong><%= inr(outstanding) %></strong><span><%= overdue.length %> overdue · <%= expiring.length %> expiring in 30d</span></div>
+  <div class="kpi cyan"><small>Today's check-ins</small><strong><%= todayIn %></strong><span><%= online %> in gym now · <%= slots %> trainer slots</span></div>
+</div>
+
+<div class="layout-12">
+  <div class="col-8">
+    <section class="card"><div class="card-head"><h2>Revenue trend · last 6 months</h2></div>
+      <div class="chart-box"><canvas id="revChart" data-chart='<%= JSON.stringify({ type: "line", labels: R.revenue.map(x => x.label), data: R.revenue.map(x => x.total) }) %>'></canvas></div></section>
+
+    <section class="card"><div class="card-head"><h2>Expiring within 30 days</h2><a href="/admin?page=members&expiry=soon">Manage members →</a></div>
+      <% if (!expiring || expiring.length === 0) { %><p class="empty">No renewals due in the next 30 days.</p><% } %>
+      <div class="list">
+        <% expiring.slice(0, 8).forEach(m => { %>
+        <div class="row"><span class="avatar sm"><%= initials(m.name) %></span>
+          <a class="grow" href="/admin?page=member&id=<%= m.member_id %>"><b><%= m.name %></b><small><%= m.plan_name || 'No plan' %> · expires <%= fdate(m.plan_end_date) %></small></a>
+          <span class="badge <%= m.days <= 7 ? 'amber' : 'cyan' %>"><%= m.days %>d left</span>
+          <form method="post" action="/admin/actions"><input type="hidden" name="action" value="send_reminder"><input type="hidden" name="member_id" value="<%= m.member_id %>"><input type="hidden" name="back" value="/admin?page=dashboard"><button class="btn xs">Remind</button></form>
+        </div>
+        <% }) %>
+      </div>
+    </section>
+
+    <div class="grid2 gap">
+      <section class="card"><div class="card-head"><h2>Live attendance</h2><a href="/admin?page=logs">All logs →</a></div>
+        <% if (!attendance || attendance.length === 0) { %><p class="empty">No check-ins yet.</p><% } %>
+        <div class="list tight">
+          <% attendance.forEach(l => { %>
+          <div class="row"><i class="live <%= l.session_status === 'Online' ? 'on' : '' %>"></i><span class="grow"><%= l.name %></span><small class="mono"><%= fdt(l.login_time) %></small>
+          <% if (l.session_status === 'Online') { %>
+            <form method="post" action="/admin/actions"><input type="hidden" name="action" value="checkout"><input type="hidden" name="log_id" value="<%= l.log_id %>"><input type="hidden" name="back" value="/admin?page=dashboard"><button class="btn xs ghost">Out</button></form>
+          <% } %>
+          </div>
+          <% }) %>
+        </div>
+      </section>
+      <section class="card"><div class="card-head"><h2>Trainer slots</h2><a href="/admin?page=trainers">Trainers →</a></div>
+        <% if (!bookings || bookings.length === 0) { %><p class="empty">No slot assignments.</p><% } %>
+        <div class="list tight">
+          <% bookings.forEach(b => { %>
+          <div class="row"><span class="grow"><b><%= b.member_name %></b> <small class="inline">with <%= b.trainer_name %></small></span><small class="mono"><%= b.slot_time.split(' - ')[0] %></small></div>
+          <% }) %>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="col-4">
+    <section class="card"><div class="card-head"><h2>Quick actions</h2></div>
+      <div class="qa">
+        <button onclick="openModal('m-member')">＋ Add member</button>
+        <button onclick="openModal('m-admin')">🛡 Add administrator</button>
+        <button onclick="openModal('m-payment')">₹ Record fee payment</button>
+        <button onclick="openModal('m-checkin')">⌁ Check-in / gate scan</button>
+        <button onclick="openModal('m-slot')">⚑ Assign trainer slot</button>
+        <button onclick="openModal('m-remind')">🔔 Generate dues alert</button>
+      </div></section>
+    <section class="card"><div class="card-head"><h2>Overdue dues</h2></div>
+      <% if (!overdue || overdue.length === 0) { %><p class="empty">All dues are clear.</p><% } %>
+      <% overdue.slice(0, 6).forEach(m => { %>
+        <div class="due"><div><a href="/admin?page=member&id=<%= m.member_id %>"><b><%= m.name %></b></a><%- statusBadge(m.status) %></div>
+          <small><%= m.plan_name || 'No plan' %> · <%= Math.abs(m.days) %>d overdue · <%= inr(m.plan_price || 0) %></small>
+          <form method="post" action="/admin/actions"><input type="hidden" name="action" value="send_reminder"><input type="hidden" name="member_id" value="<%= m.member_id %>"><input type="hidden" name="back" value="/admin?page=dashboard"><button class="btn xs">Send due alert</button></form></div>
+      <% }) %>
+    </section>
+    <section class="card"><div class="card-head"><h2>Recent payments</h2></div>
+      <% if (!recentPay || recentPay.length === 0) { %><p class="empty">No payments yet.</p><% } %>
+      <div class="list tight">
+        <% recentPay.forEach(p => { %>
+        <div class="row"><span class="grow"><b><%= p.name %></b><small><%= fdate(p.payment_date) %> · <%= p.method %></small></span><strong class="money"><%= inr(p.amount) %></strong></div>
+        <% }) %>
+      </div>
+    </section>
+  </div>
+</div>
