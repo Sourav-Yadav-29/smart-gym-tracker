@@ -1,338 +1,185 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IronPulse — Smart Gym & Fitness Membership Tracker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #090C10;
-            --surface: #11161F;
-            --elevated: #171E2B;
-            --lime: #CCFF00;
-            --cyan: #00F0FF;
-            --text: #F3F6FA;
-            --muted: #94A3B8;
-            --border: rgba(255, 255, 255, 0.08);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: var(--bg-dark);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 6%;
-            border-bottom: 1px solid var(--border);
-            background: rgba(9, 12, 16, 0.88);
-            backdrop-filter: blur(12px);
-            position: sticky;
-            top: 0;
-            z-index: 30;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 1.2rem;
-            text-decoration: none;
-            color: var(--text);
-        }
-
-        .logo-badge {
-            background: var(--lime);
-            color: #090C10;
-            width: 36px;
-            height: 36px;
-            border-radius: 9px;
-            display: grid;
-            place-items: center;
-            font-weight: 700;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 28px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: 0.15s;
-        }
-
-        .nav-links a:hover { color: var(--lime); }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-decoration: none;
-            transition: 0.18s ease;
-            display: inline-block;
-        }
-
-        .btn-outline {
-            border: 1px solid rgba(255,255,255,0.16);
-            color: var(--text);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--lime);
-            color: var(--lime);
-        }
-
-        .btn-lime {
-            background: var(--lime);
-            color: #090C10;
-            font-weight: 700;
-        }
-
-        .btn-lime:hover {
-            box-shadow: 0 0 24px rgba(204, 255, 0, 0.35);
-            transform: translateY(-1px);
-        }
-
-        .hero {
-            padding: 110px 6%;
-            background:
-                linear-gradient(90deg, rgba(9,12,16,0.96) 38%, rgba(9,12,16,0.68) 100%),
-                url('1.jpg') center/cover no-repeat;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .hero-inner { max-width: 680px; }
-
-        .pill {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 999px;
-            background: rgba(204, 255, 0, 0.12);
-            border: 1px solid rgba(204, 255, 0, 0.3);
-            color: var(--lime);
-            font-size: 0.76rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 18px;
-        }
-
-        .hero h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(2.4rem, 4.5vw, 3.7rem);
-            line-height: 1.08;
-            letter-spacing: -0.03em;
-            margin-bottom: 18px;
-        }
-
-        .hero p {
-            color: var(--muted);
-            font-size: 1.05rem;
-            margin-bottom: 30px;
-        }
-
-        .section {
-            padding: 72px 6%;
-            max-width: 1320px;
-            margin: 0 auto;
-        }
-
-        .section-head {
-            margin-bottom: 36px;
-        }
-
-        .section-head h2 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 8px;
-        }
-
-        .section-head p { color: var(--muted); }
-
-        .plans-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-        }
-
-        .plan-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.18s ease, border-color 0.18s ease;
-        }
-
-        .plan-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(204, 255, 0, 0.4);
-        }
-
-        .plan-card.featured {
-            border-color: var(--lime);
-            background: linear-gradient(180deg, rgba(204,255,0,0.06), var(--surface));
-        }
-
-        .plan-name {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .plan-price {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.1rem;
-            font-weight: 700;
-            color: var(--lime);
-            margin: 14px 0 4px;
-        }
-
-        .plan-duration {
-            font-size: 0.84rem;
-            color: var(--muted);
-            margin-bottom: 20px;
-        }
-
-        .coaches-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .coach-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-        }
-
-        .coach-card h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.25rem;
-            margin-bottom: 4px;
-        }
-
-        .coach-spec {
-            color: var(--cyan);
-            font-size: 0.84rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronPulse — Sign in</title>
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<script>try {
+  var urlTheme = (new URLSearchParams(window.location.search)).get('theme');
+  var savedTheme = localStorage.getItem('ip-theme');
+  var currentTheme = urlTheme || savedTheme || 'dark';
+  document.documentElement.dataset.theme = currentTheme;
+  if (urlTheme) localStorage.setItem('ip-theme', urlTheme);
+} catch (e) {}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/login/login.css">
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="/" class="logo">
-            <span class="logo-badge">IP</span>
-            IRONPULSE GYM
-        </a>
-        <div class="nav-links">
-            <a href="#plans">Membership Plans</a>
-            <a href="#coaches">Certified Trainers</a>
-            <a href="/login" class="btn btn-outline">Member / Staff Login</a>
-            <a href="/dashboard" class="btn btn-lime">Open Command Center →</a>
+<button class="theme-btn" type="button" onclick="toggleTheme()" aria-label="Toggle theme">
+  <span class="t-light"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span>
+  <span class="t-dark"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
+</button>
+
+<main class="shell">
+  <section class="form-side">
+
+    <h1>Welcome back</h1>
+    <p class="lede">Keep moving. Keep growing.</p>
+
+    <div class="alert" id="loginAlert" role="alert" style="display:none;" data-testid="login-error">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span id="loginAlertMsg">Invalid email or password</span>
+    </div>
+
+    <form onsubmit="handleLoginSubmit(event)" id="loginForm">
+      <span class="field-label" id="roleLabel">Sign in as</span>
+      <div class="roles" role="group" aria-labelledby="roleLabel">
+        <button type="button" class="role" data-role="member" aria-pressed="true" onclick="setRole('member')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Member
+        </button>
+        <button type="button" class="role" data-role="trainer" aria-pressed="false" onclick="setRole('trainer')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>Trainer
+        </button>
+        <button type="button" class="role" data-role="admin" aria-pressed="false" onclick="setRole('admin')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>Admin
+        </button>
+      </div>
+      <input type="hidden" name="role" id="role-input" value="member">
+
+      <div class="fields">
+        <label>Email address
+          <input type="email" name="email" id="email-input" required autocomplete="username" placeholder="e.g. member1@ironpulse.com" data-testid="login-email-input">
+        </label>
+        <div>
+          <div class="row"><label for="password-input" style="display:block">Password</label><a href="javascript:void(0)" onclick="openForgotModal()">Forgot password?</a></div>
+          <div class="pw" style="margin-top:6px">
+            <input type="password" name="password" id="password-input" required autocomplete="current-password" placeholder="Enter your password" data-testid="login-password-input">
+            <button type="button" id="eye-btn" onclick="togglePassword()" aria-label="Show password">
+              <span id="eye-on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
+              <span id="eye-off" style="display:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24M10.73 5.08A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-2.16 3.19M6.61 6.61A17.5 17.5 0 0 0 2 12s3.5 7 10 7a10.1 10.1 0 0 0 5.39-1.61M2 2l20 20"/></svg></span>
+            </button>
+          </div>
         </div>
-    </nav>
+      </div>
 
-    <section class="hero">
-        <div class="hero-inner">
-            <span class="pill">IronPulse Smart Gym & DBMS</span>
-            <h1>Train Smarter. Track Every Slot, Locker & Membership.</h1>
-            <p>Powered by automated MySQL triggers, role-restricted trainer views, and real-time slot booking telemetry.</p>
-            <div style="display:flex;gap:14px;flex-wrap:wrap;">
-                <a href="/login" class="btn btn-lime">Sign In to Portal</a>
-                <a href="#plans" class="btn btn-outline">View Membership Tiers</a>
-            </div>
+      <label class="remember"><input type="checkbox" id="remember"> Remember for 30 days</label>
+      <button type="submit" id="loginBtn" class="btn primary" data-testid="login-submit-button">Sign in</button>
+    </form>
+
+<p class="foot">Don’t have an account? Ask the front desk or management.</p>
+  </section>
+
+  <aside class="art" aria-hidden="false"><img src="/assets/ironpulse-final-logo-trans.png" alt="IronPulse Official Logo"></aside>
+</main>
+
+<!-- Forgot Password Modal -->
+<div class="modal-backdrop" id="forgotModal" style="display: none;" onclick="closeForgotModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">
+        <div class="modal-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></div>
+        <div>
+          <h3>Recover Account</h3>
+          <small>We'll dispatch fresh credentials to your email</small>
         </div>
-    </section>
+      </div>
+      <button type="button" class="close-btn" onclick="closeForgotModal()" aria-label="Close modal"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
 
-    <section id="plans" class="section">
-        <div class="section-head">
-            <h2>Membership Plans</h2>
-            <p>Transparent pricing tiers synced directly with <code>Membership_Plans</code> in MySQL.</p>
+    <!-- Input State -->
+    <div id="forgotFormState">
+      <p class="modal-desc">
+        Enter your gym-registered email address. Our security system will generate a fresh password and dispatch it immediately to your inbox.
+      </p>
+
+      <div id="forgotError" class="alert" style="display: none;">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span id="forgotErrorText"></span>
+      </div>
+
+      <form id="forgotForm" onsubmit="handleForgotSubmit(event)">
+        <label style="margin-bottom: 16px;">Registered Email Address
+          <input type="email" id="forgot-email" required placeholder="e.g. member1@ironpulse.com" autocomplete="email">
+        </label>
+        <button type="submit" id="forgotSubmitBtn" class="btn primary">
+          <span>Send Credentials to Email</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Success State -->
+    <div id="forgotSuccessState" style="display: none;">
+      <div class="success-box" style="text-align: center; padding: 12px 6px;">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(16, 185, 129, 0.12); color: #10b981; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 26px; height: 26px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <div class="plans-grid">
-            <div class="plan-card">
-                <div>
-                    <div class="plan-name">Basic Access</div>
-                    <div class="plan-price">₹4,500</div>
-                    <div class="plan-duration">3 Months Duration</div>
-                    <p style="font-size:0.86rem;color:var(--muted);">Full gym floor access, dedicated locker assignment, and standard slot booking.</p>
-                </div>
-                <a href="/login" class="btn btn-outline" style="margin-top:22px;text-align:center;">Select Basic</a>
-            </div>
+        <h4 style="margin: 0 0 8px; font-size: 18px; font-weight: 700; color: var(--fg);">Check Your Email</h4>
+        <p id="forgotSuccessMsg" style="margin: 0 0 16px; font-size: 13.5px; color: var(--muted); line-height: 1.5;"></p>
 
-            <div class="plan-card">
-                <div>
-                    <div class="plan-name">Silver Fit</div>
-                    <div class="plan-price">₹8,500</div>
-                    <div class="plan-duration">6 Months Duration</div>
-                    <p style="font-size:0.86rem;color:var(--muted);">Includes trainer-guided slot reservations, locker access, and body composition tracking.</p>
-                </div>
-                <a href="/login" class="btn btn-outline" style="margin-top:22px;text-align:center;">Select Silver Fit</a>
-            </div>
-
-            <div class="plan-card featured">
-                <div>
-                    <div class="plan-name">Gold VIP</div>
-                    <div class="plan-price">₹15,000</div>
-                    <div class="plan-duration">12 Months Duration</div>
-                    <p style="font-size:0.86rem;color:var(--muted);">Priority 1-on-1 coaching slots with Coach Marcus or Coach Elena + permanent VIP locker.</p>
-                </div>
-                <a href="/login" class="btn btn-lime" style="margin-top:22px;text-align:center;">Select Gold VIP</a>
-            </div>
-
-            <div class="plan-card">
-                <div>
-                    <div class="plan-name">Platinum Pro</div>
-                    <div class="plan-price">₹22,000</div>
-                    <div class="plan-duration">12 Months Duration</div>
-                    <p style="font-size:0.86rem;color:var(--muted);">All-access strength, hypertrophy & HIIT programming with unlimited slot bookings.</p>
-                </div>
-                <a href="/login" class="btn btn-outline" style="margin-top:22px;text-align:center;">Select Platinum Pro</a>
-            </div>
+        <div style="background: var(--soft); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--fg); text-align: left; margin-bottom: 20px;">
+          <div style="margin-bottom: 6px;">📧 <b>Sent to:</b> <span id="dispatchedEmail" class="mono" style="font-weight: 600;"></span></div>
+          <small style="display: block; color: var(--muted); font-size: 12px; line-height: 1.4;">For security reasons, your new password has been delivered strictly to your inbox. Please check your inbox and spam folder.</small>
         </div>
-    </section>
 
-    <section id="coaches" class="section" style="padding-top:10px;">
-        <div class="section-head">
-            <h2>Certified Coaching Roster</h2>
-            <p>Protected by <code>Trainer_Assigned_View</code> role-based SQL access control.</p>
-        </div>
-        <div class="coaches-grid">
-            <div class="coach-card">
-                <h3>Coach Marcus</h3>
-                <div class="coach-spec">Strength & Hypertrophy Specialist</div>
-                <p style="font-size:0.88rem;color:var(--muted);">Leads morning and evening compound strength blocks (`07:00 AM - 08:00 AM` & `05:00 PM - 06:00 PM`). Contact: <code>trainer1@ironpulse.com</code></p>
-            </div>
-            <div class="coach-card">
-                <h3>Coach Elena</h3>
-                <div class="coach-spec">Functional & HIIT Conditioning</div>
-                <p style="font-size:0.88rem;color:var(--muted);">Specializes in metabolic conditioning, mobility, and athletic endurance (`09:30 AM - 10:30 AM`). Contact: <code>trainer2@ironpulse.com</code></p>
-            </div>
-        </div>
-    </section>
+        <button type="button" class="btn primary" style="width: 100%;" onclick="closeForgotModal()">Return to Sign In</button>
+      </div>
+    </div>
 
+  </div>
+</div>
+
+<script src="/login/login.js"></script>
+<script>
+async function handleLoginSubmit(e) {
+  e.preventDefault();
+  const alertBox = document.getElementById('loginAlert');
+  const alertMsg = document.getElementById('loginAlertMsg');
+  const btn = document.getElementById('loginBtn');
+  alertBox.style.display = 'none';
+
+  const role = document.getElementById('role-input').value;
+  const email = document.getElementById('email-input').value.trim();
+  const password = document.getElementById('password-input').value;
+
+  btn.disabled = true;
+  btn.innerText = 'Signing in...';
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, role })
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alertMsg.innerText = data.error || 'Invalid email or password.';
+      alertBox.style.display = 'flex';
+      btn.disabled = false;
+      btn.innerText = 'Sign in';
+      return;
+    }
+
+    // Save session
+    localStorage.setItem('gym_user', JSON.stringify(data.user));
+
+    // Redirect based on role
+    if (data.user.role === 'admin') {
+      window.location.href = '/admin/index.html';
+    } else if (data.user.role === 'trainer') {
+      window.location.href = '/trainer/index.html';
+    } else {
+      window.location.href = '/member/index.html';
+    }
+  } catch (err) {
+    alertMsg.innerText = 'Network error: ' + err.message;
+    alertBox.style.display = 'flex';
+    btn.disabled = false;
+    btn.innerText = 'Sign in';
+  }
+}
+</script>
 </body>
 </html>

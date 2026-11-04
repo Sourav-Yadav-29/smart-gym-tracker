@@ -61,6 +61,31 @@ function statusBadge(status) {
     return `<span class="badge ${isAct ? 'green' : 'amber'}">${status || 'Inactive'}</span>`;
 }
 
+const KNOWN_EMAIL_DOMAINS = [
+    'gmail.com',
+    'outlook.com',
+    'hotmail.com',
+    'live.com',
+    'msn.com',
+    'yahoo.com',
+    'yahoo.in',
+    'yahoo.co.uk',
+    'icloud.com',
+    'me.com',
+    'proton.me',
+    'protonmail.com',
+    'zoho.com',
+    'ironpulse.com'
+];
+
+function isValidKnownEmail(email) {
+    if (!email || typeof email !== 'string') return false;
+    const clean = email.trim().toLowerCase();
+    const parts = clean.split('@');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) return false;
+    return KNOWN_EMAIL_DOMAINS.includes(parts[1]);
+}
+
 module.exports = {
     inr,
     fdate,
@@ -69,5 +94,7 @@ module.exports = {
     daysTo,
     initials,
     bmiInfo,
-    statusBadge
+    statusBadge,
+    KNOWN_EMAIL_DOMAINS,
+    isValidKnownEmail
 };

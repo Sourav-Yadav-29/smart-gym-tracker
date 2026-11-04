@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronPulse — Access Logs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+
+<script>try { document.documentElement.dataset.theme = localStorage.getItem('ip-theme') || 'light'; } catch (e) {}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+<div class="backdrop" id="navBackdrop" onclick="toggleNav(false)"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">IP</div><b>IRONPULSE</b></div>
+  <div class="rbac"><b>Admin Portal</b></div>
+  <nav>
+    <a href="/admin/index.html" id="nav-dashboard" data-testid="nav-dashboard-link">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Command Center</span>
+    </a>
+    <a href="/admin/members.html" id="nav-members" data-testid="nav-members-link">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Members & Dues</span>
+      <em id="badge-members" style="display:none;"></em>
+    </a>
+    <a href="/admin/trainers.html" id="nav-trainers" data-testid="nav-trainers-link">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4M3 10l7-7M14 21l7-7"/></svg>
+      <span>Trainers & Slots</span>
+      <em id="badge-trainers" style="display:none;"></em>
+    </a>
+    <a href="/admin/plans.html" id="nav-plans" data-testid="nav-plans-link">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+      <span>Plans & Revenue</span>
+      <em id="badge-plans" style="display:none;"></em>
+    </a>
+    <a href="/admin/reports.html" id="nav-reports" data-testid="nav-reports-link">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+      <span>Reports</span>
+    </a>
+    <a href="/admin/logs.html" class="active" id="nav-logs" data-testid="nav-logs-link">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg>
+      <span>Access Logs</span>
+      <em id="badge-logs" style="display:none;"></em>
+    </a>
+  </nav>
+  <div class="me"><span class="avatar" id="actor-avatar">AP</span><div><b id="actor-name">Arthur Pendelton</b><small id="actor-id">● Admin (#1)</small></div></div>
+  <a class="signout" href="#" onclick="logout(); return false;" data-testid="signout-link">Sign out →</a>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <button class="icon-btn mobile-only" onclick="toggleNav(true)" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <form class="search" onsubmit="event.preventDefault(); window.location.href='/admin/members.html?q=' + encodeURIComponent(this.q.value.trim())">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input name="q" placeholder="Search members by name, email, phone…" data-testid="global-search-input">
+    </form>
+    <div class="top-actions">
+      <button class="btn" type="button" onclick="openModal('m-admin')" data-testid="topbar-add-admin-button"><span class="hide-sm">New admin</span></button>
+      <button class="btn primary" type="button" onclick="openModal('m-member')" data-testid="topbar-add-member-button"><span class="hide-sm">New member</span></button>
+      <div class="notif-wrap">
+        <button class="icon-btn" id="bellBtn" type="button" onclick="toggleNotif(event)" aria-label="Notifications" data-testid="notifications-button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="count" id="notifCount" style="display:none;" data-testid="notifications-unread-count">0</span>
+        </button>
+        <div class="notif-panel" id="notifPanel" onclick="event.stopPropagation()" data-testid="notifications-panel">
+          <div class="np-head">
+            <b>Notifications & activity</b>
+            <span>
+              <button type="button" onclick="notifAction('read')" data-testid="notifications-mark-read-button">Mark read</button>
+              <button type="button" onclick="notifAction('clear')" data-testid="notifications-clear-button">Clear</button>
+            </span>
+          </div>
+          <div class="np-list" id="notifList">
+            <p class="empty">No notifications yet.</p>
+          </div>
+        </div>
+      </div>
+      <button class="icon-btn" type="button" onclick="toggleTheme()" aria-label="Toggle theme" data-testid="theme-toggle-button">
+        <span class="t-light"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span>
+        <span class="t-dark"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="page-head">
+      <div>
+        <h1>Access Logs</h1>
+        <p class="muted" id="logs-sub">Member login/logout sessions · 4 in the gym right now.</p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="/api/admin/export?type=logs">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Export CSV
+        </a>
+        <button class="btn primary" type="button" onclick="openModal('m-checkin')">Record check-in</button>
+      </div>
+    </div>
+
+    <!-- Filter Card -->
+    <form class="filters card" onsubmit="event.preventDefault(); filterAndRenderLogs();">
+      <input id="filter-log-q" placeholder="Filter by member name">
+      <select id="filter-log-status" onchange="filterAndRenderLogs()">
+        <option value="">All sessions</option>
+        <option value="Online">Online</option>
+        <option value="Logged Out">Logged Out</option>
+      </select>
+      <button class="btn" type="button" onclick="filterAndRenderLogs()">Apply</button>
+      <button class="btn ghost" type="button" onclick="clearLogsFilter()">Clear</button>
+    </form>
+
+    <!-- Logs Table -->
+    <section class="card flush">
+      <p class="empty" id="logs-empty" style="display:none;">No sessions match.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th class="hide-md">Trainer(s)</th>
+              <th>Login</th>
+              <th>Logout</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th class="right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="logs-tbody">
+            <!-- Rendered dynamically by loadLogs() -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Modals -->
+<dialog id="m-member" class="modal">
+  <form method="post" action="javascript:void(0);">
+    <h3>Enroll new member</h3><p class="muted">Create a member with plan, expiry, custom password and biometrics.</p>
+    <div id="member-modal-err" style="display:none; color:#ef4444; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); padding:10px 14px; border-radius:10px; font-size:12.5px; font-weight:600; margin-bottom: 12px;"></div>
+    <div class="grid2">
+      <label>Full name<input name="name" required placeholder="Rohan Verma" data-testid="member-name-input"></label>
+      <label>Email (Gmail, Outlook, Yahoo, etc.)<input name="email" id="member-email-input" type="email" required placeholder="rohan@gmail.com" data-testid="member-email-input"></label>
+    </div>
+    <div class="grid2">
+      <label>Phone<input name="phone" placeholder="+91 98765 43210"></label>
+      <label>Plan<select name="plan_id"></select></label>
+    </div>
+    <div class="grid2">
+      <label>Plan expiry<input name="plan_end_date" type="date" value="2027-11-02"></label>
+      <label>Initial Login Password
+        <div style="position: relative; display: flex; align-items: center; margin-top: 4px;">
+          <input name="password" id="member-pass-input" type="text" value="password123" required placeholder="Type password" style="padding-right: 90px; font-family: 'IBM Plex Mono', monospace; font-weight: 600;">
+          <button type="button" class="btn small" style="position: absolute; right: 4px; padding: 4px 8px; font-size: 11px; height: 28px;" onclick="document.getElementById('member-pass-input').value = 'Iron@' + Math.floor(1000 + Math.random()*9000)">🎲 New PIN</button>
+        </div>
+        <small class="muted" style="font-size: 11px; margin-top: 2px;">Fully editable. Credentials will be emailed automatically.</small>
+      </label>
+    </div>
+    <div class="grid3">
+      <label>Height (cm)<input name="height_cm" type="number" step="0.1" value="175"></label>
+      <label>Weight (kg)<input name="weight_kg" type="number" step="0.1" value="75"></label>
+      <label>Body fat %<input name="body_fat_pct" type="number" step="0.1" value="15"></label>
+    </div>
+    <label>Fitness goal<input name="fitness_goal" value="General Fitness"></label>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn primary" data-testid="member-form-submit-button">Create member</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="m-payment" class="modal">
+  <form method="post" action="javascript:void(0);">
+    <h3>Record member payment</h3><p class="muted">Logs a verified payment and sends the member a receipt.</p>
+    <label>Member<select name="member_id" required onchange="prefillAmount(this)"><option value="">Select member</option></select></label>
+    <div class="grid2">
+      <label>Amount (₹)<input name="amount" type="number" step="0.01" min="1" required></label>
+      <label>Date<input name="payment_date" type="date" value="2026-11-02"></label>
+    </div>
+    <label>Method<select name="method"><option>UPI / NetBanking</option><option>Credit Card</option><option>Cash</option></select></label>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn primary">Record payment</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="m-checkin" class="modal">
+  <form method="post" action="javascript:void(0);">
+    <h3>Record gate check-in</h3><p class="muted">Starts an attendance session (shown as Online in Access Logs).</p>
+    <label>Member<select name="member_id" required><option value="">Select member</option></select></label>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn primary">Check in</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="m-slot" class="modal">
+  <form method="post" action="javascript:void(0);">
+    <h3>Assign client to trainer slot</h3><p class="muted">Leave locker blank to auto-assign one.</p>
+    <label>Member<select name="member_id" required><option value="">Select member</option></select></label>
+    <label>Trainer<select name="trainer_id" required></select></label>
+    <div class="grid2">
+      <label>Slot time
+        <select name="slot_time">
+          <option>07:00 AM - 08:00 AM</option>
+          <option>09:30 AM - 10:30 AM</option>
+          <option>05:00 PM - 06:00 PM</option>
+          <option>07:00 PM - 08:00 PM</option>
+        </select>
+      </label>
+      <label>Locker (optional)<input name="locker_number" placeholder="Auto-assign"></label>
+    </div>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn primary">Assign slot</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="m-remind" class="modal">
+  <form method="post" action="javascript:void(0);">
+    <h3>Send payment due reminder</h3><p class="muted">The member gets an in-app dues alert.</p>
+    <label>Member<select name="member_id" required><option value="">Select member</option></select></label>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn primary">Send reminder</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="m-trainer" class="modal">
+  <form method="post" action="javascript:void(0);">
+    <h3>Add new trainer</h3>
+    <div id="trainer-modal-err" style="display:none; color:#ef4444; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); padding:10px 14px; border-radius:10px; font-size:12.5px; font-weight:600; margin-bottom: 12px;"></div>
+    <label>Name<input name="name" required placeholder="Coach Vikram"></label>
+    <label>Login email (Gmail, Outlook, Yahoo, etc.)<input name="email" id="trainer-email-input" type="email" required placeholder="vikram@gmail.com"></label>
+    <label>Specialization<input name="specialization" placeholder="Powerlifting & Mobility"></label>
+    <label>Initial Login Password
+      <div style="position: relative; display: flex; align-items: center; margin-top: 4px;">
+        <input name="password" id="trainer-pass-input" type="text" value="password123" required placeholder="Enter password" style="padding-right: 90px; font-family: 'IBM Plex Mono', monospace; font-weight: 600;">
+        <button type="button" class="btn small" style="position: absolute; right: 4px; padding: 4px 8px; font-size: 11px; height: 28px;" onclick="document.getElementById('trainer-pass-input').value = 'Iron@' + Math.floor(1000 + Math.random()*9000)">🎲 New PIN</button>
+      </div>
+      <small class="muted" style="font-size: 11px; margin-top: 2px;">Fully editable. Credentials will be emailed automatically.</small>
+    </label>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn primary">Add trainer</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="m-admin" class="modal">
+  <form method="post" action="javascript:void(0);">
+    <h3>Add new Administrator</h3><p class="muted">Grant team members full access to the IronPulse Admin Portal.</p>
+    <div id="admin-modal-err" style="display:none; color:#ef4444; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); padding:10px 14px; border-radius:10px; font-size:12.5px; font-weight:600; margin-bottom: 12px;"></div>
+    <label>Full name<input name="name" required placeholder="Sourav Yadav" data-testid="admin-name-input"></label>
+    <label>Login email (Gmail, Outlook, Yahoo, etc.)<input name="email" id="admin-email-input" type="email" required placeholder="admin@gmail.com" data-testid="admin-email-input"></label>
+    <label>Initial Login Password
+      <div style="position: relative; display: flex; align-items: center; margin-top: 4px;">
+        <input name="password" id="admin-pass-input" type="text" value="password123" required placeholder="Enter password" style="padding-right: 90px; font-family: 'IBM Plex Mono', monospace; font-weight: 600;">
+        <button type="button" class="btn small" style="position: absolute; right: 4px; padding: 4px 8px; font-size: 11px; height: 28px;" onclick="document.getElementById('admin-pass-input').value = 'Iron@' + Math.floor(1000 + Math.random()*9000)">🎲 New PIN</button>
+      </div>
+      <small class="muted" style="font-size: 11px; margin-top: 2px;">Fully editable. Credentials will be emailed automatically.</small>
+    </label>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn primary" data-testid="admin-form-submit-button">Add administrator</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="m-plan" class="modal">
+  <form method="post" action="javascript:void(0);">
+    <input type="hidden" name="plan_id" value="0">
+    <h3>Membership plan</h3>
+    <label>Plan name<input name="plan_name" required></label>
+    <div class="grid2">
+      <label>Price (₹)<input name="price" type="number" step="0.01" min="0" required></label>
+      <label>Duration (months)<input name="duration_months" type="number" min="1" value="12"></label>
+    </div>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn primary">Save plan</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="m-confirm" class="modal small">
+  <form method="post" action="javascript:void(0);">
+    <input type="hidden" name="action">
+    <input type="hidden" name="member_id">
+    <input type="hidden" name="trainer_id">
+    <input type="hidden" name="booking_id">
+    <h3 data-title>Are you sure?</h3>
+    <p class="muted" data-desc></p>
+    <footer>
+      <button type="button" class="btn" onclick="closeModal(this)">Cancel</button>
+      <button type="submit" class="btn danger" data-testid="confirm-delete-button">Delete</button>
+    </footer>
+  </form>
+</dialog>
+
+<script src="/admin/assets/admin-app.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', loadLogs);
+</script>
+</body>
+</html>

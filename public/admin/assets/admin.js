@@ -55,8 +55,38 @@ function notifAction(op, silent) {
   });
 }
 
-// Toast auto-hide
-setTimeout(() => { const t = document.getElementById('toast'); if (t) t.remove(); }, 4500);
+// Strict Domain Email Validation for enrollment forms
+const ALLOWED_EMAIL_DOMAINS = [
+  'gmail.com', 'outlook.com', 'hotmail.com', 'live.com', 'msn.com',
+  'yahoo.com', 'yahoo.in', 'yahoo.co.uk', 'icloud.com', 'me.com',
+  'proton.me', 'protonmail.com', 'zoho.com', 'ironpulse.com'
+];
+
+window.validateEnrollForm = function(form, emailInputId, errBoxId) {
+  const emailInput = document.getElementById(emailInputId) || form.querySelector('input[type="email"]');
+  const errBox = document.getElementById(errBoxId);
+
+  if (emailInput) {
+    const val = emailInput.value.trim().toLowerCase();
+    const parts = val.split('@');
+    if (parts.length !== 2 || !ALLOWED_EMAIL_DOMAINS.includes(parts[1])) {
+      const errorMsg = '⚠️ Unsupported email domain! Only recognized providers (Gmail, Outlook, Yahoo, iCloud, Proton, Zoho, or IronPulse) can be registered for automated credential delivery.';
+      if (errBox) {
+        errBox.textContent = errorMsg;
+        errBox.style.display = 'block';
+      } else {
+        alert(errorMsg);
+      }
+      emailInput.focus();
+      return false;
+    }
+  }
+  if (errBox) errBox.style.display = 'none';
+  return true;
+};
+
+// Toast auto-hide (extended to 8s)
+setTimeout(() => { const t = document.getElementById('toast'); if (t) t.remove(); }, 8000);
 
 // Charts (Chart.js from CDN). Each <canvas data-chart='{"type","labels","data"}'>.
 const charts = [];
@@ -95,3 +125,31 @@ function renderCharts() {
   });
 }
 window.addEventListener('load', renderCharts);
+
+// --- Allowed Email Domain Client-side Validation ---
+const ALLOWED_EMAIL_DOMAINS = [
+  'gmail.com', 'googlemail.com', 'outlook.com', 'hotmail.com',
+  'live.com', 'msn.com', 'yahoo.com', 'ymail.com', 'icloud.com',
+  'me.com', 'mac.com', 'proton.me', 'protonmail.com', 'zoho.com',
+  'zohomail.in', 'ironpulse.com'
+];
+
+function validateEnrollForm(form, inputId, errorDivId) {
+  const input = document.getElementById(inputId);
+  const errDiv = document.getElementById(errorDivId);
+  if (!input) return true;
+  const email = (input.value || '').trim().toLowerCase();
+  const parts = email.split('@');
+  if (parts.length !== 2 || !ALLOWED_EMAIL_DOMAINS.includes(parts[1])) {
+    if (errDiv) {
+      errDiv.innerText = '⚠️ Only recognized email providers (Gmail, Outlook, Yahoo, iCloud, Proton, Zoho, or IronPulse) are supported.';
+      errDiv.style.display = 'block';
+    } else {
+      alert('⚠️ Only recognized email providers (Gmail, Outlook, Yahoo, iCloud, Proton, Zoho, or IronPulse) are supported.');
+    }
+    input.focus();
+    return false;
+  }
+  if (errDiv) errDiv.style.display = 'none';
+  return true;
+}

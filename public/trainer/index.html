@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronPulse — Trainer Portal</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+
+<script>try { document.documentElement.dataset.theme = localStorage.getItem('ip-theme') || 'light'; } catch (e) {}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/trainer/assets/trainer.css">
+<style>
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="backdrop" id="navBackdrop" onclick="toggleNav(false)"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">IP</div><b>IRONPULSE</b></div>
+  <div class="rbac"><b>Trainer Portal</b></div>
+  <nav>
+    <a href="javascript:void(0)" class="active" id="nav-overview" onclick="switchTrainerTab('overview')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>
+      <span>Assigned Clients</span>
+      <em id="client-count-badge">0</em>
+    </a>
+    <a href="javascript:void(0)" id="nav-biometrics" onclick="switchTrainerTab('biometrics')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      <span>Update Client Metrics</span>
+    </a>
+    <a href="javascript:void(0)" id="nav-workouts" onclick="switchTrainerTab('workouts')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Workout Routines</span>
+    </a>
+  </nav>
+  <div class="me"><span class="avatar" id="trainer-avatar">MV</span><div class="grow"><b id="trainer-name">Marcus Vance</b><small>● Certified Trainer</small></div></div>
+  <a class="signout" href="javascript:void(0)" onclick="logout()">Sign out →</a>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <button class="icon-btn mobile-only" onclick="toggleNav(true)" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
+    <div style="flex:1;"></div>
+    <div class="top-actions">
+      <button class="btn primary" type="button" onclick="openLogWorkoutModal()">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="19" x2="19" y2="19"/></svg>
+        <span class="hide-sm">Log workout set</span>
+      </button>
+      <div class="notif-wrap">
+        <button class="icon-btn" id="bellBtn" type="button" onclick="toggleNotif(event)" aria-label="Notifications" data-testid="notifications-button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="count" id="notifCount" style="display:none;" data-testid="notifications-unread-count">0</span>
+        </button>
+        <div class="notif-panel" id="notifPanel" onclick="event.stopPropagation()" data-testid="notifications-panel">
+          <div class="np-head">
+            <b>Notifications & activity</b>
+            <span>
+              <button type="button" onclick="notifAction('read')" data-testid="notifications-mark-read-button">Mark read</button>
+              <button type="button" onclick="notifAction('clear')" data-testid="notifications-clear-button">Clear</button>
+            </span>
+          </div>
+          <div class="np-list" id="notifList" data-testid="notifications-list">
+            <p class="empty">No notifications yet.</p>
+          </div>
+        </div>
+      </div>
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme" data-testid="theme-toggle-button"><span class="t-light"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span><span class="t-dark"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span></button>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- ========================================== -->
+    <!-- TAB 1: ASSIGNED CLIENTS OVERVIEW           -->
+    <!-- ========================================== -->
+    <section id="tab-overview" class="tab-panel active">
+      <div class="page-head">
+        <div>
+          <h1 class="hero">Welcome back, Coach <span class="grad" id="hero-trainer-name">Trainer</span><span class="dotc">.</span></h1>
+          <p class="muted">Here is how your assigned clients are progressing at IronPulse today.</p>
+        </div>
+      </div>
+
+      <div class="kpis kpis-3">
+        <div class="kpi"><small>My Assigned Clients</small><strong id="stat-clients">0</strong><span>Active roster overview</span></div>
+        <div class="kpi green"><small>Average Client BMI</small><strong id="stat-bmi">24.5</strong><span>Monitored across assigned roster</span></div>
+        <div class="kpi cyan"><small>Prescribed Workouts</small><strong id="stat-workouts">0</strong><span>Active hypertrophy & HIIT sets</span></div>
+      </div>
+
+      <section class="card flush" style="margin-top:24px;">
+        <div class="card-head pad">
+          <h2>Assigned Client Roster & Schedule</h2>
+          <button class="btn" onclick="switchTrainerTab('biometrics')">Update Client BMI / Notes →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Membership</th>
+                <th>Assigned Slot & Locker</th>
+                <th>Height / Weight</th>
+                <th>Client BMI & Body Fat</th>
+                <th>Fitness Goal & Notes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="trainer-clients-tbody">
+              <tr><td colspan="7" class="empty">Loading your assigned clients...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: UPDATE CLIENT BMI & NOTES           -->
+    <!-- ========================================== -->
+    <section id="tab-biometrics" class="tab-panel">
+      <div class="page-head">
+        <div>
+          <h1>Update Client Metrics & Directives</h1>
+          <p class="muted">Monitor biometric progress, body fat adjustments and assign nutrition recommendations.</p>
+        </div>
+      </div>
+
+      <div class="layout-12" style="margin-top:20px;">
+        <div class="col-6">
+          <section class="card">
+            <div class="card-head"><h2>Client Biometric Assessment Form</h2></div>
+            <form onsubmit="handleTrainerUpdateBiometrics(event)" style="display:flex; flex-direction:column; gap:14px; margin-top:14px;">
+              <label>Select Assigned Client
+                <select name="member_id" id="trainer-bio-client-select" required onchange="onTrainerBioClientChange()">
+                  <option>Loading assigned clients...</option>
+                </select>
+              </label>
+
+              <div class="grid2">
+                <label>Height (cm)<input type="number" step="0.1" name="height_cm" id="tr-bio-height" required></label>
+                <label>Weight (kg)<input type="number" step="0.1" name="weight_kg" id="tr-bio-weight" required></label>
+              </div>
+
+              <div class="grid2">
+                <label>Body Fat %<input type="number" step="0.1" name="body_fat_pct" id="tr-bio-bf" value="15.0"></label>
+                <label>Fitness Target Goal<input name="fitness_goal" id="tr-bio-goal" placeholder="e.g. Lean Hypertrophy" required></label>
+              </div>
+
+              <label>Trainer Nutrition & Training Directive
+                <textarea name="trainer_notes" id="tr-bio-notes" rows="4" placeholder="e.g. Focus on progressive overload, consume 2g/kg protein and 3L water daily." style="width:100%; border:1px solid var(--border); border-radius:8px; padding:10px; font-family:inherit; background:var(--card-bg); color:var(--fg);"></textarea>
+              </label>
+
+              <button type="submit" class="btn primary block">Save Client Assessment</button>
+            </form>
+          </section>
+        </div>
+
+        <div class="col-6">
+          <section class="card">
+            <div class="card-head"><h2>Current Selected Client Biometric Card</h2></div>
+            <div id="trainer-bio-preview-card" style="padding:16px 0; font-size:13.5px; line-height:1.8;">
+              <p>Select a client from the dropdown to inspect current biometric benchmarks and notes.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: CLIENT WORKOUT ROUTINES             -->
+    <!-- ========================================== -->
+    <section id="tab-workouts" class="tab-panel">
+      <div class="page-head">
+        <div>
+          <h1>Prescribe & View Client Workout Routines</h1>
+          <p class="muted">Monitor your assigned clients' full routines, exercise volume, weights, and assign new sets.</p>
+        </div>
+      </div>
+
+      <div class="layout-12" style="margin-top:20px;">
+        <div class="col-5">
+          <section class="card">
+            <div class="card-head"><h2>Prescribe Exercise Set</h2></div>
+            <form id="f-trainer-log-workout" onsubmit="handleTrainerLogWorkout(event)" style="display:flex; flex-direction:column; gap:14px; margin-top:14px;">
+              <label>Select Client
+                <select name="member_id" id="trainer-workout-client-select" required onchange="onTrainerWorkoutClientChange()">
+                  <option value="">Loading clients...</option>
+                </select>
+              </label>
+
+              <label>Exercise Name<input name="exercise_name" required placeholder="e.g. Incline Dumbbell Press"></label>
+
+              <div class="grid2">
+                <label>Target Muscle
+                  <select name="muscle_group">
+                    <option value="Chest">Chest</option>
+                    <option value="Back">Back</option>
+                    <option value="Legs">Legs</option>
+                    <option value="Shoulders">Shoulders</option>
+                    <option value="Arms">Arms</option>
+                    <option value="Core">Core</option>
+                    <option value="Full Body">Full Body</option>
+                    <option value="Conditioning">Conditioning</option>
+                  </select>
+                </label>
+                <label>Weight (kg)<input type="number" step="0.5" name="weight_kg" value="25" required></label>
+              </div>
+
+              <div class="grid2">
+                <label>Sets<input type="number" name="sets" value="4" min="1" max="10" required></label>
+                <label>Reps<input type="number" name="reps" value="12" min="1" max="50" required></label>
+              </div>
+
+              <button type="submit" class="btn primary block">Log Workout Set</button>
+            </form>
+          </section>
+        </div>
+
+        <div class="col-7">
+          <section class="card">
+            <div class="card-head pad" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+              <div>
+                <h2 id="routine-heading" style="margin:0;">Client Workout Routine & History</h2>
+                <small class="muted" id="routine-subheading" style="display:block;margin-top:2px;">Showing recent workout history for all assigned clients</small>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <label style="margin:0;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;">
+                  <span>Client Routine:</span>
+                  <select id="routine-client-filter" onchange="onRoutineFilterChange()" style="padding:6px 10px;font-size:13px;border-radius:8px;background:var(--card);color:var(--fg);border:1px solid var(--border);">
+                    <option value="all">All Assigned Clients</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Exercise</th>
+                    <th>Muscle</th>
+                    <th>Sets × Reps</th>
+                    <th>Weight</th>
+                    <th>Coach</th>
+                  </tr>
+                </thead>
+                <tbody id="trainer-workouts-tbody">
+                  <tr><td colspan="7" class="empty">No workouts assigned yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Log Workout Set Modal -->
+<dialog id="m-log-workout" class="modal small" style="margin:auto;border:1px solid var(--border);border-radius:18px;background:var(--card);color:var(--fg);padding:22px;width:min(480px,94vw);max-height:90vh;overflow-y:auto;">
+  <form method="post" action="javascript:void(0);" onsubmit="handleModalLogWorkout(event)">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="margin:0;">Log Workout Set</h3>
+      <button type="button" class="btn xs" onclick="closeLogWorkoutModal()">✕</button>
+    </div>
+    <p class="muted" style="margin:0;font-size:13px;">Prescribe and record an exercise set to the client's workout routine.</p>
+
+    <label>Select Client
+      <select name="member_id" id="modal-workout-client-select" required style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-family:inherit;background:var(--card);color:var(--fg);">
+        <option value="">Select assigned client...</option>
+      </select>
+    </label>
+
+    <label>Exercise Name
+      <input name="exercise_name" id="modal-workout-exercise" required placeholder="e.g. Incline Dumbbell Press" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-family:inherit;background:var(--card);color:var(--fg);">
+    </label>
+
+    <div class="grid2">
+      <label>Target Muscle
+        <select name="muscle_group" id="modal-workout-muscle" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-family:inherit;background:var(--card);color:var(--fg);">
+          <option value="Chest">Chest</option>
+          <option value="Back">Back</option>
+          <option value="Legs">Legs</option>
+          <option value="Shoulders">Shoulders</option>
+          <option value="Arms">Arms</option>
+          <option value="Core">Core</option>
+          <option value="Full Body">Full Body</option>
+          <option value="Conditioning">Conditioning</option>
+        </select>
+      </label>
+      <label>Weight (kg)
+        <input type="number" step="0.5" name="weight_kg" id="modal-workout-weight" value="25" required style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-family:inherit;background:var(--card);color:var(--fg);">
+      </label>
+    </div>
+
+    <div class="grid2">
+      <label>Sets
+        <input type="number" name="sets" id="modal-workout-sets" value="4" min="1" max="10" required style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-family:inherit;background:var(--card);color:var(--fg);">
+      </label>
+      <label>Reps
+        <input type="number" name="reps" id="modal-workout-reps" value="12" min="1" max="50" required style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-family:inherit;background:var(--card);color:var(--fg);">
+      </label>
+    </div>
+
+    <footer style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
+      <button type="button" class="btn" onclick="closeLogWorkoutModal()">Cancel</button>
+      <button type="submit" class="btn primary">Save & Prescribe Set</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- Cancel Slot Modal -->
+<dialog id="m-cancel-slot" class="modal small" style="margin:auto;border:1px solid var(--border);border-radius:18px;background:var(--card);color:var(--fg);padding:22px;width:min(460px,94vw);max-height:90vh;overflow-y:auto;">
+  <form method="post" action="javascript:void(0);" onsubmit="handleTrainerCancelSlot(event)">
+    <input type="hidden" name="booking_id" id="cancel-booking-id">
+    <input type="hidden" name="member_id" id="cancel-member-id">
+    <input type="hidden" name="member_name" id="cancel-member-name">
+    <h3>Cancel Slot</h3>
+    <p class="muted" id="cancel-slot-info">Cancel this client's assigned slot.</p>
+    <label>Reason for cancellation
+      <textarea name="cancel_reason" id="cancel-reason" rows="3" required placeholder="e.g. Schedule conflict, gym maintenance, personal leave..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;background:var(--card);color:var(--fg);"></textarea>
+    </label>
+    <footer style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
+      <button type="button" class="btn" onclick="closeCancelModal()">Keep Slot</button>
+      <button type="submit" class="btn" style="background:#DC2626;color:white;border-color:#DC2626;">Cancel Slot</button>
+    </footer>
+  </form>
+</dialog>
+
+<script>
+let assignedClientsCache = [];
+
+function checkAuth() {
+  const userStr = localStorage.getItem('gym_user');
+  if (!userStr) {
+    window.location.href = '/index.html';
+    return null;
+  }
+  try {
+    const user = JSON.parse(userStr);
+    if (user.role !== 'trainer') {
+      window.location.href = '/index.html';
+      return null;
+    }
+    const name = user.name || 'Coach';
+    document.getElementById('trainer-name').innerText = name;
+    document.getElementById('hero-trainer-name').innerText = name;
+    const parts = name.split(' ');
+    document.getElementById('trainer-avatar').innerText = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
+    return user;
+  } catch (e) {
+    window.location.href = '/index.html';
+    return null;
+  }
+}
+
+function logout() {
+  localStorage.removeItem('gym_user');
+  window.location.href = '/index.html';
+}
+
+function toggleTheme() {
+  const current = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = current;
+  try { localStorage.setItem('ip-theme', current); } catch (e) {}
+}
+
+function toggleNav(open) {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('navBackdrop');
+  if (sidebar) sidebar.classList.toggle('open', open);
+  if (backdrop) backdrop.classList.toggle('open', open);
+}
+
+function switchTrainerTab(tabId) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+
+  const targetPanel = document.getElementById('tab-' + tabId);
+  const targetNav = document.getElementById('nav-' + tabId);
+
+  if (targetPanel) targetPanel.classList.add('active');
+  if (targetNav) targetNav.classList.add('active');
+
+  toggleNav(false);
+}
+
+async function loadAllTrainerData() {
+  const user = checkAuth();
+  if (!user) return;
+  const trainerId = user.id || user.trainer_id;
+
+  try {
+    // 1. Clients
+    const res = await fetch(`/api/trainer/${trainerId}/clients`);
+    const rows = await res.json();
+    const seen = new Set();
+    assignedClientsCache = Array.isArray(rows) ? rows.filter(c => !seen.has(c.member_id) && seen.add(c.member_id)) : [];
+
+    document.getElementById('stat-clients').innerText = assignedClientsCache.length;
+    document.getElementById('client-count-badge').innerText = assignedClientsCache.length;
+
+    // Calculate avg BMI
+    if (assignedClientsCache.length > 0) {
+      const avg = (assignedClientsCache.reduce((acc, c) => acc + (Number(c.bmi) || 24), 0) / assignedClientsCache.length).toFixed(1);
+      document.getElementById('stat-bmi').innerText = avg;
+    }
+
+    renderTrainerClientsTable(assignedClientsCache);
+    populateClientSelects(assignedClientsCache);
+
+    // 2. Workouts
+    loadTrainerWorkouts(trainerId, 'all');
+
+  } catch (err) {
+    console.error('Error fetching trainer data:', err);
+  }
+}
+
+function renderTrainerClientsTable(clients) {
+  const tbody = document.getElementById('trainer-clients-tbody');
+  if (!tbody) return;
+
+  if (clients.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No clients assigned to your coach ID yet. Admin can assign slots from the Admin Portal.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = clients.map(c => `
+    <tr>
+      <td>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="avatar sm">${escapeHtml(c.member_name.slice(0, 2).toUpperCase())}</span>
+          <div>
+            <b>${escapeHtml(c.member_name)}</b>
+            <small style="display:block; color:var(--muted); font-size:11px;">${escapeHtml(c.member_email || 'No email')} · ${escapeHtml(c.member_phone || '—')}</small>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge ${c.member_status === 'Active' ? 'green' : 'amber'}">${escapeHtml(c.member_status || 'Inactive')}</span></td>
+      <td>
+        <span class="mono">${escapeHtml(c.slot_time)}</span>
+        <span class="badge cyan">${escapeHtml(c.locker_number || 'L-101')}</span>
+      </td>
+      <td class="nowrap">
+        <b>${c.height_cm || 175} cm</b> / <b>${c.weight_kg || 75} kg</b>
+      </td>
+      <td>
+        <span class="badge blue">BMI: ${c.bmi || 24.5}</span>
+        <small style="display:block; color:var(--muted);">Body Fat: ${c.body_fat_pct || 15.0}%</small>
+      </td>
+      <td>
+        <span style="font-weight:600; font-size:12.5px;">${escapeHtml(c.fitness_goal || 'General Fitness')}</span>
+        <small style="display:block; color:var(--muted); font-size:11px;">${escapeHtml(c.trainer_notes || 'No notes yet.')}</small>
+      </td>
+      <td>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <button class="btn xs primary" type="button" onclick="viewClientRoutine(${c.member_id}, '${escapeHtml(c.member_name)}')">View Routine</button>
+          <button class="btn xs" type="button" onclick="openLogWorkoutModal(${c.member_id})">+ Log Set</button>
+          <button class="btn xs" type="button" style="color:#DC2626; border-color:#DC2626;" onclick='openCancelSlotModal(${JSON.stringify({ booking_id: c.booking_id, member_id: c.member_id, member_name: c.member_name, slot_time: c.slot_time })})'>Cancel</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function populateClientSelects(clients) {
+  const s1 = document.getElementById('trainer-bio-client-select');
+  const s2 = document.getElementById('trainer-workout-client-select');
+  const s3 = document.getElementById('modal-workout-client-select');
+  const sf = document.getElementById('routine-client-filter');
+
+  if (clients.length === 0) {
+    if (s1) s1.innerHTML = '<option value="">No assigned clients</option>';
+    if (s2) s2.innerHTML = '<option value="">No assigned clients</option>';
+    if (s3) s3.innerHTML = '<option value="">No assigned clients</option>';
+    if (sf) sf.innerHTML = '<option value="all">No assigned clients</option>';
+    return;
+  }
+
+  const opts = clients.map(c => `<option value="${c.member_id}">${escapeHtml(c.member_name)} (BMI: ${c.bmi || 24.5})</option>`).join('');
+  if (s1) s1.innerHTML = opts;
+  if (s2) s2.innerHTML = opts;
+  if (s3) s3.innerHTML = '<option value="">-- Choose Assigned Client --</option>' + opts;
+  if (sf) {
+    sf.innerHTML = '<option value="all">All Assigned Clients (Recent Logs)</option>' +
+      clients.map(c => `<option value="${c.member_id}">${escapeHtml(c.member_name)} (Full Routine)</option>`).join('');
+  }
+
+  onTrainerBioClientChange();
+}
+
+function onTrainerBioClientChange() {
+  const sel = document.getElementById('trainer-bio-client-select');
+  if (!sel || !sel.value) return;
+  const c = assignedClientsCache.find(x => String(x.member_id) === String(sel.value));
+  if (!c) return;
+
+  document.getElementById('tr-bio-height').value = c.height_cm || 175;
+  document.getElementById('tr-bio-weight').value = c.weight_kg || 75;
+  document.getElementById('tr-bio-bf').value = c.body_fat_pct || 15.0;
+  document.getElementById('tr-bio-goal').value = c.fitness_goal || 'General Fitness';
+  document.getElementById('tr-bio-notes').value = c.trainer_notes === 'No notes yet.' ? '' : (c.trainer_notes || '');
+
+  document.getElementById('trainer-bio-preview-card').innerHTML = `
+    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:16px;">
+      <h3 style="margin:0 0 8px;">${escapeHtml(c.member_name)}</h3>
+      <p style="margin:4px 0; color:var(--muted);">Current BMI: <b>${c.bmi || 24.5}</b> · Body Fat: <b>${c.body_fat_pct || 15.0}%</b></p>
+      <p style="margin:4px 0; color:var(--muted);">Slot Timing: <b>${escapeHtml(c.slot_time)}</b> · Locker: <b>${escapeHtml(c.locker_number)}</b></p>
+      <p style="margin:4px 0; color:var(--primary); font-weight:600;">Fitness Target: ${escapeHtml(c.fitness_goal || 'General Fitness')}</p>
+    </div>
+  `;
+}
+
+function openLogWorkoutModal(memberId) {
+  const modal = document.getElementById('m-log-workout');
+  if (!modal) return;
+  const s3 = document.getElementById('modal-workout-client-select');
+  if (s3) {
+    if (memberId) {
+      s3.value = String(memberId);
+    } else {
+      const sf = document.getElementById('routine-client-filter');
+      if (sf && sf.value && sf.value !== 'all') {
+        s3.value = sf.value;
+      } else if (assignedClientsCache.length > 0) {
+        s3.value = String(assignedClientsCache[0].member_id);
+      }
+    }
+  }
+  if (typeof modal.showModal === 'function') {
+    modal.showModal();
+  } else {
+    modal.setAttribute('open', '');
+  }
+}
+
+function closeLogWorkoutModal() {
+  const modal = document.getElementById('m-log-workout');
+  if (!modal) return;
+  if (typeof modal.close === 'function') {
+    modal.close();
+  } else {
+    modal.removeAttribute('open');
+  }
+}
+
+function viewClientRoutine(memberId, memberName) {
+  switchTrainerTab('workouts');
+  const sf = document.getElementById('routine-client-filter');
+  if (sf) {
+    sf.value = String(memberId);
+    onRoutineFilterChange();
+  }
+  const s2 = document.getElementById('trainer-workout-client-select');
+  if (s2) {
+    s2.value = String(memberId);
+  }
+}
+
+function onRoutineFilterChange() {
+  const user = checkAuth();
+  if (!user) return;
+  const trainerId = user.id || user.trainer_id;
+  const sf = document.getElementById('routine-client-filter');
+  const selVal = sf ? sf.value : 'all';
+  const heading = document.getElementById('routine-heading');
+  const sub = document.getElementById('routine-subheading');
+  const s2 = document.getElementById('trainer-workout-client-select');
+
+  if (selVal === 'all') {
+    if (heading) heading.innerText = 'Client Workout Routine & History';
+    if (sub) sub.innerText = 'Showing recent workout history across all your assigned clients.';
+  } else {
+    const client = assignedClientsCache.find(c => String(c.member_id) === String(selVal));
+    const name = client ? client.member_name : 'Selected Client';
+    const goal = client ? (client.fitness_goal || 'General Fitness') : 'General Fitness';
+    const bmi = client ? (client.bmi || '24.5') : '24.5';
+    const fat = client ? (client.body_fat_pct || '15.0') : '15.0';
+    if (heading) heading.innerText = `${name}'s Workout Routine`;
+    if (sub) sub.innerText = `Fitness Target: ${goal} · Current BMI: ${bmi} · Body Fat: ${fat}%`;
+    if (s2) s2.value = String(selVal);
+  }
+
+  loadTrainerWorkouts(trainerId, selVal);
+}
+
+function onTrainerWorkoutClientChange() {
+  const s2 = document.getElementById('trainer-workout-client-select');
+  const sf = document.getElementById('routine-client-filter');
+  if (s2 && sf && s2.value) {
+    sf.value = s2.value;
+    onRoutineFilterChange();
+  }
+}
+
+async function loadTrainerWorkouts(trainerId, memberFilter = 'all') {
+  try {
+    const url = (memberFilter && memberFilter !== 'all')
+      ? `/api/trainer/${trainerId}/workouts?member_id=${memberFilter}`
+      : `/api/trainer/${trainerId}/workouts`;
+    const res = await fetch(url);
+    const workouts = await res.json();
+
+    const statEl = document.getElementById('stat-workouts');
+    if (statEl && memberFilter === 'all' && Array.isArray(workouts)) {
+      statEl.innerText = workouts.length;
+    }
+
+    const tbody = document.getElementById('trainer-workouts-tbody');
+    if (!tbody) return;
+
+    if (!Array.isArray(workouts) || workouts.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">No workouts found for this client routine. Prescribe one using the form on the left!</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = workouts.map(w => {
+      const d = w.workout_date ? new Date(w.workout_date).toLocaleDateString('en-GB') : '-';
+      const coachName = w.coach || (w.trainer_name || 'Coach');
+      return `
+        <tr>
+          <td><small class="muted mono">${d}</small></td>
+          <td><b>${escapeHtml(w.member_name || 'Client')}</b></td>
+          <td><b>${escapeHtml(w.exercise_name)}</b></td>
+          <td><span class="badge blue">${escapeHtml(w.muscle_group || 'Full Body')}</span></td>
+          <td><strong>${w.sets}</strong> × <strong>${w.reps}</strong></td>
+          <td><b>${w.weight_kg} kg</b></td>
+          <td><span class="badge cyan" style="font-size:11px;">${escapeHtml(coachName)}</span></td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Error fetching trainer workouts:', err);
+  }
+}
+
+async function submitWorkoutPayload(payload, formToReset) {
+  try {
+    const res = await fetch('/api/trainer/workout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      alert('✅ Workout set prescribed and logged successfully!');
+      if (formToReset && formToReset.exercise_name) {
+        formToReset.exercise_name.value = '';
+      }
+      closeLogWorkoutModal();
+      const user = checkAuth();
+      const trainerId = user ? (user.id || user.trainer_id) : 1;
+      const sf = document.getElementById('routine-client-filter');
+      const activeFilter = sf ? sf.value : 'all';
+      loadTrainerWorkouts(trainerId, activeFilter);
+    } else {
+      alert(result.error || 'Failed to assign workout');
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+async function handleTrainerLogWorkout(e) {
+  e.preventDefault();
+  const user = checkAuth();
+  if (!user) return;
+  const form = e.target;
+  const memberId = form.member_id.value;
+  if (!memberId) return alert('Please select an assigned client.');
+
+  const payload = {
+    trainer_id: user.id || user.trainer_id,
+    member_id: memberId,
+    exercise_name: form.exercise_name.value.trim(),
+    muscle_group: form.muscle_group.value,
+    sets: parseInt(form.sets.value, 10) || 3,
+    reps: parseInt(form.reps.value, 10) || 10,
+    weight_kg: parseFloat(form.weight_kg.value) || 0
+  };
+
+  await submitWorkoutPayload(payload, form);
+}
+
+async function handleModalLogWorkout(e) {
+  e.preventDefault();
+  const user = checkAuth();
+  if (!user) return;
+  const form = e.target;
+  const memberId = form.member_id.value;
+  if (!memberId) return alert('Please choose an assigned client.');
+
+  const payload = {
+    trainer_id: user.id || user.trainer_id,
+    member_id: memberId,
+    exercise_name: form.exercise_name.value.trim(),
+    muscle_group: form.muscle_group.value,
+    sets: parseInt(form.sets.value, 10) || 3,
+    reps: parseInt(form.reps.value, 10) || 10,
+    weight_kg: parseFloat(form.weight_kg.value) || 0
+  };
+
+  await submitWorkoutPayload(payload, form);
+}
+
+async function handleTrainerUpdateBiometrics(e) {
+  e.preventDefault();
+  const user = checkAuth();
+  if (!user) return;
+  const trainerId = user.id || user.trainer_id;
+  const form = e.target;
+  if (!form.member_id.value) return alert('No assigned client selected.');
+  const payload = {
+    trainer_id: trainerId,
+    member_id: form.member_id.value,
+    height_cm: form.height_cm.value,
+    weight_kg: form.weight_kg.value,
+    body_fat_pct: form.body_fat_pct.value,
+    fitness_goal: form.fitness_goal.value,
+    trainer_notes: form.trainer_notes.value.trim()
+  };
+
+  try {
+    const res = await fetch('/api/trainer/biometrics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      alert('✅ Client biometrics & nutrition notes saved successfully!');
+      loadAllTrainerData();
+    } else {
+      alert(result.error || 'Failed to update client biometrics');
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+// ----------------------------------------------------
+// Notification Bell (same behaviour as the Admin portal)
+// ----------------------------------------------------
+const NOTIF_ROLE = 'trainer';
+let lastUnread = -1;
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+}
+
+function fdt(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return d;
+  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' +
+         dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function notifUser() {
+  try { return JSON.parse(localStorage.getItem('gym_user')) || {}; } catch (e) { return {}; }
+}
+
+function setNotifCount(n) {
+  const c = document.getElementById('notifCount');
+  if (!c) return;
+  c.textContent = n > 99 ? '99+' : n;
+  c.style.display = n > 0 ? 'inline-grid' : 'none';
+}
+
+function toggleNotif(e) {
+  if (e) e.stopPropagation();
+  const p = document.getElementById('notifPanel');
+  if (!p) return;
+  p.classList.toggle('open');
+  document.getElementById('bellBtn').classList.remove('pulse-ring');
+  if (p.classList.contains('open')) notifAction('read', true);
+}
+
+async function notifAction(op, silent) {
+  const u = notifUser();
+  try {
+    const res = await fetch('/api/notifications/' + (op === 'clear' ? 'clear' : 'read'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: NOTIF_ROLE, id: u.id })
+    });
+    if (!res.ok) throw new Error('Request failed');
+    setNotifCount(0);
+    lastUnread = 0;
+    if (op === 'clear') loadNotifications(true);
+    if (!silent) document.querySelectorAll('.np-item.unread').forEach(el => el.classList.remove('unread'));
+  } catch (err) {
+    console.error('Notification action error:', err);
+  }
+}
+
+async function loadNotifications(force) {
+  const u = notifUser();
+  if (!u.id) return;
+  try {
+    const res = await fetch(`/api/notifications?role=${NOTIF_ROLE}&id=${encodeURIComponent(u.id)}`);
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.notifications || []);
+    const unread = data.unread !== undefined ? Number(data.unread) : list.filter(n => !Number(n.is_read)).length;
+
+    setNotifCount(unread);
+    if (lastUnread >= 0 && unread > lastUnread) document.getElementById('bellBtn').classList.add('pulse-ring');
+    lastUnread = unread;
+
+    const panel = document.getElementById('notifPanel');
+    const listEl = document.getElementById('notifList');
+    if (!listEl || (!force && panel && panel.classList.contains('open'))) return;
+    listEl.innerHTML = list.length === 0
+      ? '<p class="empty">No notifications yet.</p>'
+      : list.map(n => `
+        <div class="np-item ${Number(n.is_read) ? '' : 'unread'}" data-testid="notification-item">
+          <div><span class="tag">${escapeHtml(n.category || 'System')}</span><time>${fdt(n.created_at)}</time></div>
+          <p>${escapeHtml(n.message)}</p><small>— ${escapeHtml(n.actor_name || 'System')}</small>
+        </div>`).join('');
+  } catch (err) {
+    console.error('Error fetching notifications:', err);
+  }
+}
+
+document.addEventListener('click', () => {
+  const p = document.getElementById('notifPanel');
+  if (p) p.classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const p = document.getElementById('notifPanel');
+    if (p) p.classList.remove('open');
+  }
+});
+
+// -------------------------------------------------
+// Slot Cancellation (Trainer → Member notification)
+// -------------------------------------------------
+function openCancelSlotModal(data) {
+  document.getElementById('cancel-booking-id').value = data.booking_id;
+  document.getElementById('cancel-member-id').value = data.member_id;
+  document.getElementById('cancel-member-name').value = data.member_name;
+  document.getElementById('cancel-slot-info').textContent = `Cancel ${data.member_name}'s ${data.slot_time} slot assignment.`;
+  document.getElementById('cancel-reason').value = '';
+  const dlg = document.getElementById('m-cancel-slot');
+  if (typeof dlg.showModal === 'function') dlg.showModal();
+  else dlg.setAttribute('open', '');
+}
+
+function closeCancelModal() {
+  const dlg = document.getElementById('m-cancel-slot');
+  if (typeof dlg.close === 'function') dlg.close();
+  else dlg.removeAttribute('open');
+}
+
+async function handleTrainerCancelSlot(e) {
+  e.preventDefault();
+  const user = checkAuth();
+  if (!user) return;
+
+  const bookingId = document.getElementById('cancel-booking-id').value;
+  const memberId = document.getElementById('cancel-member-id').value;
+  const memberName = document.getElementById('cancel-member-name').value;
+  const reason = document.getElementById('cancel-reason').value.trim();
+
+  if (!reason) return alert('Please provide a reason for cancellation.');
+
+  try {
+    const res = await fetch('/api/trainer/cancel-slot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        booking_id: bookingId,
+        trainer_id: user.id,
+        member_id: memberId,
+        reason: reason
+      })
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      alert('Slot cancelled. ' + memberName + ' has been notified.');
+      closeCancelModal();
+      loadAllTrainerData();
+    } else {
+      alert(result.error || 'Failed to cancel slot.');
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadAllTrainerData();
+  loadNotifications();
+  setInterval(loadNotifications, 30000);
+});
+</script>
+</body>
+</html>

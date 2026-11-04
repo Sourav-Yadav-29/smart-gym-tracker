@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronPulse — Member Portal</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+
+<script>try { document.documentElement.dataset.theme = localStorage.getItem('ip-theme') || 'light'; } catch (e) {}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/member/assets/member.css">
+<style>
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.dues-banner { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; font-weight: 600; font-size: 14px; }
+.dues-banner.green { background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; }
+.dues-banner.amber { background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b; }
+.dues-banner.red { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; }
+.cycle-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 16px; }
+.cycle-btn { padding: 10px 4px; border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; font-weight: 600; cursor: pointer; text-align: center; color: var(--fg); font-size: 13px; }
+.cycle-btn { transition: border-color .15s, background-color .15s, transform .1s; }
+.cycle-btn:hover { border-color: var(--primary); }
+.cycle-btn:active { transform: scale(.97); }
+.cycle-btn.active { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); color: var(--primary); }
+[data-theme=light] .cycle-btn.active { color: #0369A1; }
+</style>
+</head>
+<body>
+<div class="backdrop" id="navBackdrop" onclick="toggleNav(false)"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">IP</div><b>IRONPULSE</b></div>
+  <div class="rbac"><b>Member Portal</b></div>
+  <nav>
+    <a href="javascript:void(0)" class="active" id="nav-overview" onclick="switchMemberTab('overview')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+      <span>My Fitness Hub</span>
+    </a>
+    <a href="javascript:void(0)" id="nav-bmi" onclick="switchMemberTab('bmi')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>My BMI & Workouts</span>
+    </a>
+    <a href="javascript:void(0)" id="nav-schedule" onclick="switchMemberTab('schedule')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>My Slot & Locker</span>
+      <em id="badge-slots">1</em>
+    </a>
+    <a href="javascript:void(0)" id="nav-billing" onclick="switchMemberTab('billing')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+      <span>Upcoming Dues & Pay</span>
+    </a>
+  </nav>
+  <div class="me"><span class="avatar" id="member-avatar">AM</span><div><b id="member-name">Alex Mery</b><small>● Active Member</small></div></div>
+  <a class="signout" href="javascript:void(0)" onclick="logout()">Sign out →</a>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <button class="icon-btn mobile-only" onclick="toggleNav(true)" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
+    <div style="flex:1;"></div>
+    <div class="top-actions">
+      <button class="btn primary" onclick="switchMemberTab('billing')">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span class="hide-sm">Pay upcoming dues</span>
+      </button>
+      <div class="notif-wrap">
+        <button class="icon-btn" id="bellBtn" type="button" onclick="toggleNotif(event)" aria-label="Notifications" data-testid="notifications-button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="count" id="notifCount" style="display:none;" data-testid="notifications-unread-count">0</span>
+        </button>
+        <div class="notif-panel" id="notifPanel" onclick="event.stopPropagation()" data-testid="notifications-panel">
+          <div class="np-head">
+            <b>Notifications & activity</b>
+            <span>
+              <button type="button" onclick="notifAction('read')" data-testid="notifications-mark-read-button">Mark read</button>
+              <button type="button" onclick="notifAction('clear')" data-testid="notifications-clear-button">Clear</button>
+            </span>
+          </div>
+          <div class="np-list" id="notifList" data-testid="notifications-list">
+            <p class="empty">No notifications yet.</p>
+          </div>
+        </div>
+      </div>
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme" data-testid="theme-toggle-button"><span class="t-light"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span><span class="t-dark"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span></button>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- ========================================== -->
+    <!-- TAB 1: MY FITNESS HUB (OVERVIEW)           -->
+    <!-- ========================================== -->
+    <section id="tab-overview" class="tab-panel active">
+      <div class="page-head">
+        <div>
+          <h1 class="hero">Welcome back, <span class="grad" id="hero-name">Member</span><span class="dotc">.</span></h1>
+          <p class="muted">Your membership, training progress and billing at a glance.</p>
+        </div>
+        <button class="btn" onclick="switchMemberTab('bmi')">Update my BMI →</button>
+      </div>
+
+      <!-- Dues banner -->
+      <section class="dues-banner green" id="dues-banner">
+        <div id="dues-banner-text">✓ Active billing cycle (365 days remaining)</div>
+        <button class="btn xs" onclick="switchMemberTab('billing')">Renew / Pay</button>
+      </section>
+
+      <div class="kpis">
+        <div class="kpi sky"><small>Membership Plan</small><strong id="kpi-plan">Gold</strong><span id="kpi-expiry">Active Subscription</span></div>
+        <div class="kpi green"><small>Personal Trainer</small><strong id="kpi-trainer">Coach Marcus</strong><span id="kpi-slot">08:00 AM - 09:30 AM</span></div>
+        <div class="kpi cyan"><small>Assigned Locker</small><strong id="kpi-locker">L-104</strong><span>Secured private locker</span></div>
+        <div class="kpi amber"><small>Body Mass Index (BMI)</small><strong id="kpi-bmi">24.5</strong><span id="kpi-goal">Goal: Muscle Growth</span></div>
+      </div>
+
+      <div class="layout-12" style="margin-top:24px;">
+        <div class="col-8">
+          <section class="card">
+            <div class="card-head"><h2>Current Physical Biometrics</h2><span class="badge green">Verified Check</span></div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:16px; margin-top:16px;">
+              <div style="padding:14px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px;">
+                <small class="muted">Height</small>
+                <div style="font-size:20px; font-weight:700; margin-top:4px;" id="ov-height">175 cm</div>
+              </div>
+              <div style="padding:14px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px;">
+                <small class="muted">Weight</small>
+                <div style="font-size:20px; font-weight:700; margin-top:4px;" id="ov-weight">75 kg</div>
+              </div>
+              <div style="padding:14px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px;">
+                <small class="muted">Body Fat %</small>
+                <div style="font-size:20px; font-weight:700; margin-top:4px;" id="ov-bf">15.0%</div>
+              </div>
+              <div style="padding:14px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px;">
+                <small class="muted">Fitness Goal</small>
+                <div style="font-size:16px; font-weight:700; margin-top:4px;" id="ov-goal">Lean Hypertrophy</div>
+              </div>
+            </div>
+
+            <div style="margin-top:20px; padding:16px; background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.2); border-radius:10px;">
+              <h4 style="margin:0 0 6px; font-size:13.5px; color:var(--primary);">Trainer's Nutrition & Workout Directive:</h4>
+              <p style="margin:0; font-size:13px; color:var(--fg); line-height:1.6;" id="ov-notes">Maintain high-protein intake (2g/kg), stay in slight caloric surplus, and emphasize progressive overload on compound lifts.</p>
+            </div>
+          </section>
+
+          <section class="card" style="margin-top:20px;">
+            <div class="card-head"><h2>Recent Gate Attendance Sessions</h2></div>
+            <div class="table-container" style="margin-top:12px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Check-in Date & Time</th>
+                    <th>Status</th>
+                    <th>Gate IP</th>
+                  </tr>
+                </thead>
+                <tbody id="member-attendance-tbody">
+                  <tr><td colspan="3" class="empty">No gate logs recorded yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-4">
+          <section class="card">
+            <div class="card-head"><h2>Scheduled Training Summary</h2></div>
+            <div style="padding:12px 0; font-size:13.5px; line-height:1.8;">
+              <p>● <b>Coach:</b> <span id="ov-coach">Coach Marcus Vance</span></p>
+              <p>● <b>Slot Window:</b> <span id="ov-slot">08:00 AM - 09:30 AM</span></p>
+              <p>● <b>Locker Number:</b> <span id="ov-locker">L-104</span></p>
+              <p>● <b>Plan Expiry:</b> <span id="ov-expiry-date">01 Nov 2027</span></p>
+            </div>
+            <button class="btn block" style="margin-top:10px;" onclick="switchMemberTab('schedule')">Manage Slots →</button>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: MY BMI & WORKOUTS                   -->
+    <!-- ========================================== -->
+    <section id="tab-bmi" class="tab-panel">
+      <div class="page-head">
+        <div>
+          <h1>My BMI & Workout Tracking</h1>
+          <p class="muted">Update personal biometrics and record your progressive hypertrophy workout sets.</p>
+        </div>
+      </div>
+
+      <div class="layout-12" style="margin-top:20px;">
+        <div class="col-5">
+          <!-- Update Biometrics Form -->
+          <section class="card">
+            <div class="card-head"><h2>Update Body Metrics & BMI</h2></div>
+            <form onsubmit="handleUpdateBiometrics(event)" style="display:flex; flex-direction:column; gap:14px; margin-top:14px;">
+              <div class="grid2">
+                <label>Height (cm)<input type="number" step="0.1" name="height_cm" id="bio-form-height" required></label>
+                <label>Weight (kg)<input type="number" step="0.1" name="weight_kg" id="bio-form-weight" required></label>
+              </div>
+              <div class="grid2">
+                <label>Body Fat %<input type="number" step="0.1" name="body_fat_pct" id="bio-form-bf" value="15.0"></label>
+                <label>Target Goal<input name="fitness_goal" id="bio-form-goal" placeholder="e.g. Muscle Gain" required></label>
+              </div>
+              <button type="submit" class="btn primary block">Update My Metrics</button>
+            </form>
+          </section>
+
+          <!-- Log Workout Form -->
+          <section class="card" style="margin-top:20px;">
+            <div class="card-head"><h2>Log Workout Exercise Set</h2></div>
+            <form onsubmit="handleLogWorkout(event)" style="display:flex; flex-direction:column; gap:14px; margin-top:14px;">
+              <label>Exercise Name<input name="exercise_name" required placeholder="e.g. Barbell Bench Press"></label>
+              <div class="grid2">
+                <label>Muscle Group
+                  <select name="muscle_group">
+                    <option value="Chest">Chest</option>
+                    <option value="Back">Back</option>
+                    <option value="Legs">Legs</option>
+                    <option value="Shoulders">Shoulders</option>
+                    <option value="Arms">Arms</option>
+                    <option value="Core">Core</option>
+                  </select>
+                </label>
+                <label>Weight (kg)<input type="number" step="0.5" name="weight_kg" value="60" required></label>
+              </div>
+              <div class="grid2">
+                <label>Sets<input type="number" name="sets" value="3" min="1" max="10" required></label>
+                <label>Reps<input type="number" name="reps" value="10" min="1" max="50" required></label>
+              </div>
+              <button type="submit" class="btn primary block">Record Workout Log</button>
+            </form>
+          </section>
+        </div>
+
+        <div class="col-7">
+          <section class="card">
+            <div class="card-head"><h2>Logged Workout Progression History</h2></div>
+            <div class="table-container" style="margin-top:14px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Exercise</th>
+                    <th>Muscle Group</th>
+                    <th>Sets × Reps</th>
+                    <th>Weight</th>
+                    <th>Logged Date</th>
+                  </tr>
+                </thead>
+                <tbody id="member-workouts-tbody">
+                  <tr><td colspan="5" class="empty">No workout logs recorded yet. Use the form to log your first exercise set!</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: MY SLOT & LOCKER                    -->
+    <!-- ========================================== -->
+    <section id="tab-schedule" class="tab-panel">
+      <div class="page-head">
+        <div>
+          <h1>My Slot & Locker Bookings</h1>
+          <p class="muted">Reserve additional training slots with coaches and manage locker allotments.</p>
+        </div>
+      </div>
+
+      <div class="layout-12" style="margin-top:20px;">
+        <div class="col-5">
+          <section class="card">
+            <div class="card-head"><h2>Book Training Slot & Locker</h2></div>
+            <form onsubmit="handleMemberBookSlot(event)" style="display:flex; flex-direction:column; gap:14px; margin-top:14px;">
+              <label>Choose Coach
+                <select name="trainer_id" id="mem-slot-trainer-select" required>
+                  <option>Loading coaches...</option>
+                </select>
+              </label>
+              <label>Preferred Workout Slot
+                <select name="slot_time">
+                  <option>06:00 AM - 07:00 AM (Early Bird)</option>
+                  <option>07:00 AM - 08:30 AM (Peak Morning)</option>
+                  <option>09:30 AM - 10:30 AM (Mid Morning)</option>
+                  <option>05:00 PM - 06:30 PM (Evening)</option>
+                  <option>07:00 PM - 08:30 PM (Prime Evening)</option>
+                  <option>08:30 PM - 09:30 PM (Night Owls)</option>
+                </select>
+              </label>
+              <button type="submit" class="btn primary block">+ Reserve My Slot & Locker</button>
+            </form>
+          </section>
+        </div>
+
+        <div class="col-7">
+          <section class="card">
+            <div class="card-head"><h2>Active Scheduled Slots</h2></div>
+            <div class="table-container" style="margin-top:14px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Coach</th>
+                    <th>Slot Timing</th>
+                    <th>Assigned Locker</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="member-slots-tbody">
+                  <tr><td colspan="4" class="empty">No active slots reserved.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: UPCOMING DUES & PAY                 -->
+    <!-- ========================================== -->
+    <section id="tab-billing" class="tab-panel">
+      <div class="page-head">
+        <div>
+          <h1>Upcoming Dues & Plan Renewal</h1>
+          <p class="muted">Settle subscription renewals and view verified payment receipts.</p>
+        </div>
+        <span class="badge green" id="billing-badge-expiry">Active Subscription</span>
+      </div>
+
+      <div class="layout-12" style="margin-top:20px;">
+        <div class="col-5">
+          <section class="card">
+            <div class="card-head"><h2>Pay Dues / Renew Membership</h2></div>
+            <form onsubmit="handlePayDues(event)" style="display:flex; flex-direction:column; gap:14px; margin-top:14px;">
+              <label>1. Select Membership Tier
+                <select name="plan_id" id="pay-plan-select" onchange="recalcPayAmount()">
+                  <option value="1" data-monthly="1500">Standard Plan (₹1,500/mo)</option>
+                </select>
+              </label>
+
+              <div>
+                <label>2. Choose Billing Duration</label>
+                <div class="cycle-btns">
+                  <div class="cycle-btn" onclick="selectCycle(1, this)">1 Month</div>
+                  <div class="cycle-btn active" onclick="selectCycle(3, this)">3 Months</div>
+                  <div class="cycle-btn" onclick="selectCycle(6, this)">6 Months</div>
+                  <div class="cycle-btn" onclick="selectCycle(12, this)">12 Months</div>
+                </div>
+                <input type="hidden" name="cycle_months" id="pay-cycle" value="3">
+              </div>
+
+              <label>3. Payment Method
+                <select name="method">
+                  <option value="UPI / NetBanking">UPI / NetBanking (GPay, PhonePe, Paytm)</option>
+                  <option value="Credit Card">Credit / Debit Card</option>
+                  <option value="Cash">Cash at Front Desk</option>
+                </select>
+              </label>
+
+              <div style="padding:14px; background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.25); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:13.5px; font-weight:600;">Total Payable:</span>
+                <span style="font-size:22px; font-weight:800; color:var(--primary);" id="pay-total-amount">₹4,500</span>
+              </div>
+
+              <button type="submit" class="btn primary block">Confirm & Settle Dues</button>
+            </form>
+          </section>
+        </div>
+
+        <div class="col-7">
+          <section class="card">
+            <div class="card-head"><h2>Verified Payment Ledger Receipts</h2></div>
+            <div class="table-container" style="margin-top:14px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Payment Date</th>
+                    <th>Amount Paid</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="member-payments-tbody">
+                  <tr><td colspan="4" class="empty">Loading payments history...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+let memberProfileCache = null;
+let allPlansCache = [];
+let currentCycleMonths = 3;
+
+function checkAuth() {
+  const userStr = localStorage.getItem('gym_user');
+  if (!userStr) {
+    window.location.href = '/index.html';
+    return null;
+  }
+  try {
+    const user = JSON.parse(userStr);
+    if (user.role !== 'member') {
+      window.location.href = '/index.html';
+      return null;
+    }
+    const name = user.name || 'Member';
+    document.getElementById('member-name').innerText = name;
+    document.getElementById('hero-name').innerText = name;
+    const parts = name.split(' ');
+    document.getElementById('member-avatar').innerText = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
+    return user;
+  } catch (e) {
+    window.location.href = '/index.html';
+    return null;
+  }
+}
+
+function logout() {
+  localStorage.removeItem('gym_user');
+  window.location.href = '/index.html';
+}
+
+function toggleTheme() {
+  const current = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = current;
+  try { localStorage.setItem('ip-theme', current); } catch (e) {}
+}
+
+function toggleNav(open) {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('navBackdrop');
+  if (sidebar) sidebar.classList.toggle('open', open);
+  if (backdrop) backdrop.classList.toggle('open', open);
+}
+
+function switchMemberTab(tabId) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+
+  const targetPanel = document.getElementById('tab-' + tabId);
+  const targetNav = document.getElementById('nav-' + tabId);
+
+  if (targetPanel) targetPanel.classList.add('active');
+  if (targetNav) targetNav.classList.add('active');
+
+  toggleNav(false);
+}
+
+// ----------------------------------------------------
+// Data Loading
+// ----------------------------------------------------
+async function loadAllMemberData() {
+  const user = checkAuth();
+  if (!user) return;
+
+  try {
+    // 1. Profile, Plan, Coach
+    const res = await fetch(`/api/member/${user.id}/profile`);
+    memberProfileCache = await res.json();
+    populateOverviewTab(memberProfileCache);
+
+    // 2. Workouts
+    loadWorkouts(user.id);
+
+    // 3. Slots
+    loadSlots(user.id);
+
+    // 4. Payments
+    loadPayments(user.id);
+
+    // 5. Plans & Coaches for selects
+    loadSelectOptions();
+
+  } catch (err) {
+    console.error('Error loading member data:', err);
+  }
+}
+
+function populateOverviewTab(p) {
+  if (!p) return;
+
+  // Dues banner calculation
+  const end = new Date(p.plan_end_date);
+  const now = new Date();
+  const diffDays = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+  const banner = document.getElementById('dues-banner');
+  const bannerText = document.getElementById('dues-banner-text');
+
+  if (diffDays < 0) {
+    banner.className = 'dues-banner red';
+    bannerText.innerText = `⚠ Membership expired (${Math.abs(diffDays)} days overdue). Please settle dues to continue training.`;
+  } else if (diffDays <= 14) {
+    banner.className = 'dues-banner amber';
+    bannerText.innerText = `⏳ Renewal Due Soon (Expires in ${diffDays} days). Settle dues to retain locker & slots.`;
+  } else {
+    banner.className = 'dues-banner green';
+    bannerText.innerText = `✓ Active Billing Cycle (${diffDays} days remaining until renewal).`;
+  }
+
+  // KPIs
+  document.getElementById('kpi-plan').innerText = p.plan_name || 'Standard Plan';
+  document.getElementById('kpi-expiry').innerText = 'Valid until: ' + new Date(p.plan_end_date).toLocaleDateString('en-GB');
+  document.getElementById('kpi-trainer').innerText = p.trainer_name || 'No Coach Assigned';
+  document.getElementById('kpi-slot').innerText = p.slot_time || 'No Slot Scheduled';
+  document.getElementById('kpi-locker').innerText = p.locker_number || 'Locker Assigned';
+  document.getElementById('kpi-bmi').innerText = p.bmi || '24.5';
+  document.getElementById('kpi-goal').innerText = 'Goal: ' + (p.fitness_goal || 'General Fitness');
+
+  // Overview biometrics
+  document.getElementById('ov-height').innerText = (p.height_cm || 175) + ' cm';
+  document.getElementById('ov-weight').innerText = (p.weight_kg || 75) + ' kg';
+  document.getElementById('ov-bf').innerText = (p.body_fat_pct || 15.0) + '%';
+  document.getElementById('ov-goal').innerText = p.fitness_goal || 'General Fitness';
+  document.getElementById('ov-coach').innerText = p.trainer_name || 'Front Desk Assigned';
+  document.getElementById('ov-slot').innerText = p.slot_time || 'General Gym Hours';
+  document.getElementById('ov-locker').innerText = p.locker_number || 'L-101';
+  document.getElementById('ov-expiry-date').innerText = new Date(p.plan_end_date).toLocaleDateString('en-GB');
+
+  // Pre-fill biometrics form
+  document.getElementById('bio-form-height').value = p.height_cm || 175;
+  document.getElementById('bio-form-weight').value = p.weight_kg || 75;
+  document.getElementById('bio-form-bf').value = p.body_fat_pct || 15.0;
+  document.getElementById('bio-form-goal').value = p.fitness_goal || 'General Fitness';
+
+  document.getElementById('billing-badge-expiry').innerText = 'Valid until ' + new Date(p.plan_end_date).toLocaleDateString('en-GB');
+}
+
+async function loadWorkouts(memberId) {
+  try {
+    const res = await fetch(`/api/member/${memberId}/workouts`);
+    const workouts = await res.json();
+    const tbody = document.getElementById('member-workouts-tbody');
+    if (!tbody) return;
+
+    if (workouts.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">No workout logs recorded yet. Use the form on the left to log your first exercise set!</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = workouts.map(w => `
+      <tr>
+        <td><b>${w.exercise_name}</b></td>
+        <td><span class="badge blue">${w.muscle_group}</span></td>
+        <td><strong>${w.sets}</strong> sets × <strong>${w.reps}</strong> reps</td>
+        <td><strong>${w.weight_kg}</strong> kg</td>
+        <td><small class="muted">${new Date(w.workout_date).toLocaleDateString('en-GB')}</small></td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Error fetching workouts:', err);
+  }
+}
+
+async function loadSlots(memberId) {
+  try {
+    const res = await fetch(`/api/member/${memberId}/slots`);
+    const slots = await res.json();
+    const tbody = document.getElementById('member-slots-tbody');
+    const badge = document.getElementById('badge-slots');
+    if (badge) badge.innerText = slots.length;
+
+    if (!tbody) return;
+    if (slots.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">No active slots booked. Use the form on the left to reserve your coach slot!</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = slots.map(s => `
+      <tr>
+        <td><b>${s.trainer_name}</b> <small style="display:block; color:var(--muted);">${s.specialization || 'Coach'}</small></td>
+        <td><span class="badge blue">${s.slot_time}</span></td>
+        <td><span class="badge amber">${s.locker_number || 'L-101'}</span></td>
+        <td>
+          <button class="btn xs danger" onclick="cancelMemberSlot(${s.booking_id})">Cancel</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Error fetching slots:', err);
+  }
+}
+
+async function loadPayments(memberId) {
+  try {
+    const res = await fetch(`/api/member/${memberId}/payments`);
+    const payments = await res.json();
+    const tbody = document.getElementById('member-payments-tbody');
+    if (!tbody) return;
+
+    if (payments.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">No verified payments found.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = payments.map(p => `
+      <tr>
+        <td>${new Date(p.payment_date).toLocaleDateString('en-GB')}</td>
+        <td><b style="color:var(--primary);">₹${Number(p.amount).toLocaleString('en-IN')}</b></td>
+        <td><span class="badge cyan">${p.method || 'Credit Card'}</span></td>
+        <td><span class="badge green">Verified ✓</span></td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Error fetching payments:', err);
+  }
+}
+
+async function loadSelectOptions() {
+  try {
+    const [tRes, pRes] = await Promise.all([fetch('/api/trainers'), fetch('/api/plans')]);
+    const trainers = await tRes.json();
+    allPlansCache = await pRes.json();
+
+    const tSelect = document.getElementById('mem-slot-trainer-select');
+    if (tSelect) {
+      tSelect.innerHTML = trainers.map(t => `<option value="${t.trainer_id}">${t.name} (${t.specialization})</option>`).join('');
+    }
+
+    const pSelect = document.getElementById('pay-plan-select');
+    if (pSelect) {
+      pSelect.innerHTML = allPlansCache.map(p => {
+        const monthly = Math.round(p.price / Math.max(1, p.duration_months));
+        return `<option value="${p.plan_id}" data-monthly="${monthly}">${p.plan_name} (₹${monthly.toLocaleString('en-IN')}/mo)</option>`;
+      }).join('');
+    }
+    recalcPayAmount();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function selectCycle(months, btnEl) {
+  currentCycleMonths = months;
+  document.getElementById('pay-cycle').value = months;
+  document.querySelectorAll('.cycle-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  recalcPayAmount();
+}
+
+function recalcPayAmount() {
+  const sel = document.getElementById('pay-plan-select');
+  if (!sel || !sel.selectedOptions[0]) return;
+  const monthly = Number(sel.selectedOptions[0].dataset.monthly) || 1500;
+  const total = monthly * currentCycleMonths;
+  document.getElementById('pay-total-amount').innerText = '₹' + total.toLocaleString('en-IN');
+}
+
+// ----------------------------------------------------
+// Form Handlers
+// ----------------------------------------------------
+async function handleUpdateBiometrics(e) {
+  e.preventDefault();
+  const user = checkAuth();
+  if (!user) return;
+
+  const form = e.target;
+  const payload = {
+    member_id: user.id,
+    height_cm: form.height_cm.value,
+    weight_kg: form.weight_kg.value,
+    body_fat_pct: form.body_fat_pct.value,
+    fitness_goal: form.fitness_goal.value
+  };
+
+  try {
+    const res = await fetch('/api/member/biometrics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      alert('✅ Biometrics updated! New BMI calculated.');
+      loadAllMemberData();
+    } else {
+      alert(result.error || 'Failed to update biometrics');
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+async function handleLogWorkout(e) {
+  e.preventDefault();
+  const user = checkAuth();
+  if (!user) return;
+
+  const form = e.target;
+  const payload = {
+    member_id: user.id,
+    exercise_name: form.exercise_name.value.trim(),
+    muscle_group: form.muscle_group.value,
+    sets: form.sets.value,
+    reps: form.reps.value,
+    weight_kg: form.weight_kg.value
+  };
+
+  try {
+    const res = await fetch('/api/member/workout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      alert('✅ Workout logged successfully!');
+      form.reset();
+      loadWorkouts(user.id);
+    } else {
+      alert(result.error || 'Failed to log workout');
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+async function handleMemberBookSlot(e) {
+  e.preventDefault();
+  const user = checkAuth();
+  if (!user) return;
+
+  const form = e.target;
+  const payload = {
+    member_id: user.id,
+    trainer_id: form.trainer_id.value,
+    slot_time: form.slot_time.value,
+    locker_number: 'L-' + Math.floor(100 + Math.random() * 900)
+  };
+
+  try {
+    const res = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      alert(`✅ Slot reserved with Coach! Dedicated Locker #${payload.locker_number} allotted.`);
+      loadSlots(user.id);
+    } else {
+      alert(result.error || 'Failed to book slot');
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+async function cancelMemberSlot(bookingId) {
+  if (!confirm('Cancel this scheduled workout slot?')) return;
+  try {
+    const res = await fetch(`/api/bookings/${bookingId}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      const user = checkAuth();
+      if (user) loadSlots(user.id);
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+async function handlePayDues(e) {
+  e.preventDefault();
+  const user = checkAuth();
+  if (!user) return;
+
+  const form = e.target;
+  const sel = document.getElementById('pay-plan-select');
+  const monthly = Number(sel.selectedOptions[0].dataset.monthly) || 1500;
+  const total = monthly * currentCycleMonths;
+
+  const payload = {
+    member_id: user.id,
+    plan_id: form.plan_id.value,
+    cycle_months: currentCycleMonths,
+    amount: total,
+    method: form.method.value
+  };
+
+  try {
+    const res = await fetch('/api/member/pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      alert(`🎉 Payment of ₹${total.toLocaleString('en-IN')} confirmed! Your membership has been extended.`);
+      loadAllMemberData();
+      switchMemberTab('overview');
+    } else {
+      alert(result.error || 'Payment failed');
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+// ----------------------------------------------------
+// Notification Bell (same behaviour as the Admin portal)
+// ----------------------------------------------------
+const NOTIF_ROLE = 'member';
+let lastUnread = -1;
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+}
+
+function fdt(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return d;
+  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' +
+         dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function notifUser() {
+  try { return JSON.parse(localStorage.getItem('gym_user')) || {}; } catch (e) { return {}; }
+}
+
+function setNotifCount(n) {
+  const c = document.getElementById('notifCount');
+  if (!c) return;
+  c.textContent = n > 99 ? '99+' : n;
+  c.style.display = n > 0 ? 'inline-grid' : 'none';
+}
+
+function toggleNotif(e) {
+  if (e) e.stopPropagation();
+  const p = document.getElementById('notifPanel');
+  if (!p) return;
+  p.classList.toggle('open');
+  document.getElementById('bellBtn').classList.remove('pulse-ring');
+  if (p.classList.contains('open')) notifAction('read', true);
+}
+
+async function notifAction(op, silent) {
+  const u = notifUser();
+  try {
+    const res = await fetch('/api/notifications/' + (op === 'clear' ? 'clear' : 'read'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: NOTIF_ROLE, id: u.id })
+    });
+    if (!res.ok) throw new Error('Request failed');
+    setNotifCount(0);
+    lastUnread = 0;
+    if (op === 'clear') loadNotifications(true);
+    if (!silent) document.querySelectorAll('.np-item.unread').forEach(el => el.classList.remove('unread'));
+  } catch (err) {
+    console.error('Notification action error:', err);
+  }
+}
+
+async function loadNotifications(force) {
+  const u = notifUser();
+  if (!u.id) return;
+  try {
+    const res = await fetch(`/api/notifications?role=${NOTIF_ROLE}&id=${encodeURIComponent(u.id)}`);
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.notifications || []);
+    const unread = data.unread !== undefined ? Number(data.unread) : list.filter(n => !Number(n.is_read)).length;
+
+    setNotifCount(unread);
+    if (lastUnread >= 0 && unread > lastUnread) document.getElementById('bellBtn').classList.add('pulse-ring');
+    lastUnread = unread;
+
+    const panel = document.getElementById('notifPanel');
+    const listEl = document.getElementById('notifList');
+    if (!listEl || (!force && panel && panel.classList.contains('open'))) return;
+    listEl.innerHTML = list.length === 0
+      ? '<p class="empty">No notifications yet.</p>'
+      : list.map(n => `
+        <div class="np-item ${Number(n.is_read) ? '' : 'unread'}" data-testid="notification-item">
+          <div><span class="tag">${escapeHtml(n.category || 'System')}</span><time>${fdt(n.created_at)}</time></div>
+          <p>${escapeHtml(n.message)}</p><small>— ${escapeHtml(n.actor_name || 'System')}</small>
+        </div>`).join('');
+  } catch (err) {
+    console.error('Error fetching notifications:', err);
+  }
+}
+
+document.addEventListener('click', () => {
+  const p = document.getElementById('notifPanel');
+  if (p) p.classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const p = document.getElementById('notifPanel');
+    if (p) p.classList.remove('open');
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadAllMemberData();
+  loadNotifications();
+  setInterval(loadNotifications, 30000);
+});
+</script>
+</body>
+</html>
